@@ -1,0 +1,33 @@
+---
+title: "Florida Bay Buoy Explorer"
+subtitle: "Static dashboard for NDBC salinity interpolation and mapping"
+format: html
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+This site hosts a static [Quarto dashboard](https://quarto.org/docs/dashboards/) for exploring Everglades National Park buoy salinity data from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html).
+
+The dashboard reuses interpolation and mapping methods from the [south-florida-salinity](https://github.com/usf-imars/south-florida-salinity) project:
+
+- **Leaflet** htmlwidgets for interactive buoy maps ([Quarto htmlwidgets](https://quarto.org/docs/interactive/widgets/htmlwidgets.html))
+- **DIVAnd** variational analysis with bathymetry-aware land masking
+- Hourly field panels at 06:00, 12:00, 18:00, and 24:00 US Eastern
+
+## Open the dashboard
+
+[**Launch dashboard →**](dashboard.html)
+
+## Build locally
+
+```bash
+quarto render
+```
+
+To publish as a static site on GitHub Pages:
+
+```bash
+make publish
+```

@@ -1,0 +1,32 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Florida Bay Buoy Explorer"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: dashboard.qmd
+        text: Dashboard
+    right:
+      - icon: github
+        href: https://github.com/usf-imars/fl-bay-usgs-buoy-explorer
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: false
+    code-fold: true
+    message: false
+    warning: false
+  dashboard:
+    theme: cosmo
+    css: styles.css
+    message: false
+    warning: false
+
+execute:
+  freeze: auto

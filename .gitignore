@@ -1,0 +1,15 @@
+_site/
+.quarto/
+_freeze/
+
+# Local symlinks to sibling repo caches (optional)
+data/bathymetry
+julia/
+
+.Rproj.user
+.Rhistory
+.RData
+.DS_Store
+
+/.quarto/
+**/*.quarto_ipynb
