@@ -3,8 +3,7 @@ _site/
 _freeze/
 
 # Local symlinks to sibling repo caches (optional)
-data/bathymetry
-julia/
+data/
 
 .Rproj.user
 .Rhistory
