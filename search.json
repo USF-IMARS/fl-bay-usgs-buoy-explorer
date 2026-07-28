@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Florida Bay Buoy Explorer",
+    "section": "",
+    "text": "This site hosts a static Quarto dashboard for exploring Everglades National Park buoy salinity data from SECOORA ERDDAP.\nThe dashboard reuses interpolation and mapping methods from the south-florida-salinity project:"
+  },
+  {
+    "objectID": "index.html#open-the-dashboard",
+    "href": "index.html#open-the-dashboard",
+    "title": "Florida Bay Buoy Explorer",
+    "section": "Open the dashboard",
+    "text": "Open the dashboard\nLaunch dashboard →"
+  },
+  {
+    "objectID": "index.html#build-locally",
+    "href": "index.html#build-locally",
+    "title": "Florida Bay Buoy Explorer",
+    "section": "Build locally",
+    "text": "Build locally\nquarto render\nTo publish as a static site on GitHub Pages:\nmake publish"
+  }
+]
