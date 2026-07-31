@@ -257,22 +257,3 @@ plot_ndbc_hour_pair(
   label_fn = format_hour_panel_label
 )
 ```
-
-## Row
-
-```{r paired-all, results='asis'}
-#| title: All hours (stacked)
-
-if (all(vapply(salinity_fields, function(x) is.null(x$field) || nrow(x$field) == 0, logical(1))) ||
-    all(vapply(temperature_fields, function(x) is.null(x$field) || nrow(x$field) == 0, logical(1)))) {
-  stop("No interpolated salinity or temperature fields were produced.")
-}
-
-plot_ndbc_paired_field_panels(
-  salinity_fields,
-  temperature_fields,
-  sal_palette = salinity_palette,
-  temp_palette = temperature_palette,
-  label_fn = format_hour_panel_label
-)
-```
