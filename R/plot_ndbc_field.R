@@ -239,3 +239,128 @@ plot_salinity_field <- function(field, observations) {
     popup_suffix = " PSU"
   )
 }
+
+field_value_range <- function(field_results, value_col) {
+  valid <- Filter(function(x) !is.null(x$field) && nrow(x$field) > 0, field_results)
+  if (length(valid) == 0) {
+    return(c(NA_real_, NA_real_))
+  }
+  range(
+    unlist(lapply(valid, function(x) {
+      c(x$field[[value_col]], x$observations[[value_col]])
+    }), use.names = FALSE),
+    na.rm = TRUE
+  )
+}
+
+plot_ndbc_hour_pair <- function(
+    sal_result,
+    temp_result,
+    sal_value_range,
+    temp_value_range,
+    sal_palette,
+    temp_palette,
+    panel_height = 320,
+    show_sal_legend = FALSE,
+    show_temp_legend = FALSE,
+    show_hour_label = TRUE,
+    label_fn = NULL
+) {
+  label <- if (is.null(label_fn)) {
+    format_ndbc_time(sal_result$target_time)
+  } else {
+    label_fn(sal_result$target_time, sal_result$hour)
+  }
+
+  sal_map <- if (is.null(sal_result$field) || nrow(sal_result$field) == 0) {
+    htmltools::tags$p(class = "ndbc-field-panel-empty", "No salinity data for this hour.")
+  } else {
+    plot_ndbc_field(
+      sal_result$field,
+      sal_result$observations,
+      value_col = "salinity",
+      legend_title = "Salinity (PSU)",
+      popup_suffix = " PSU",
+      palette = sal_palette,
+      height = panel_height,
+      value_range = sal_value_range,
+      show_legend = show_sal_legend,
+      show_scale_bar = FALSE,
+      show_layers_control = FALSE
+    )
+  }
+
+  temp_map <- if (is.null(temp_result$field) || nrow(temp_result$field) == 0) {
+    htmltools::tags$p(class = "ndbc-field-panel-empty", "No temperature data for this hour.")
+  } else {
+    plot_ndbc_field(
+      temp_result$field,
+      temp_result$observations,
+      value_col = "temperature",
+      legend_title = "Temperature (°C)",
+      popup_suffix = " °C",
+      palette = temp_palette,
+      height = panel_height,
+      value_range = temp_value_range,
+      show_legend = show_temp_legend,
+      show_scale_bar = FALSE,
+      show_layers_control = FALSE
+    )
+  }
+
+  htmltools::tags$div(
+    class = "ndbc-paired-hour",
+    if (show_hour_label) {
+      htmltools::tags$p(class = "ndbc-paired-hour-label", label)
+    },
+    htmltools::tags$div(
+      class = "ndbc-paired-row",
+      htmltools::tags$div(
+        class = "ndbc-field-panel",
+        htmltools::tags$p(class = "ndbc-field-panel-label", "Salinity"),
+        sal_map
+      ),
+      htmltools::tags$div(
+        class = "ndbc-field-panel",
+        htmltools::tags$p(class = "ndbc-field-panel-label", "Temperature"),
+        temp_map
+      )
+    )
+  )
+}
+
+plot_ndbc_paired_field_panels <- function(
+    salinity_fields,
+    temperature_fields,
+    sal_palette,
+    temp_palette,
+    panel_height = 320,
+    label_fn = NULL
+) {
+  if (length(salinity_fields) != length(temperature_fields)) {
+    stop("Salinity and temperature field results must have the same length.")
+  }
+
+  sal_range <- field_value_range(salinity_fields, "salinity")
+  temp_range <- field_value_range(temperature_fields, "temperature")
+  last_idx <- length(salinity_fields)
+
+  htmltools::tags$div(
+    class = "ndbc-paired-stack",
+    lapply(seq_along(salinity_fields), function(i) {
+      plot_ndbc_hour_pair(
+        salinity_fields[[i]],
+        temperature_fields[[i]],
+        sal_value_range = sal_range,
+        temp_value_range = temp_range,
+        sal_palette = sal_palette,
+        temp_palette = temp_palette,
+        panel_height = panel_height,
+        show_sal_legend = i == last_idx,
+        show_temp_legend = i == last_idx,
+        show_hour_label = TRUE,
+        label_fn = label_fn
+      )
+    })
+  )
+}

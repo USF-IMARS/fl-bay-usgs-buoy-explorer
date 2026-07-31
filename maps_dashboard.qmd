@@ -1,0 +1,278 @@
+---
+title: "Salinity & Temperature Maps"
+subtitle: "Paired DIVAnd-interpolated fields from Everglades NDBC buoys"
+author: "USGS / SECOORA ERDDAP"
+format:
+  dashboard:
+    theme: cosmo
+    css: styles.css
+    nav-buttons:
+      - icon: github
+        href: https://github.com/usf-imars/fl-bay-usgs-buoy-explorer
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| output: false
+
+library(dplyr)
+library(htmltools)
+library(leaflet)
+library(scales)
+
+source("R/fetch_ndbc_observations.R")
+source("R/plot_ndbc_field.R")
+source("R/load_field_data.R")
+
+sal_ndbc <- fetch_ndbc_hourly_snapshots(
+  param = "sea_water_practical_salinity",
+  value_col = "salinity"
+)
+temp_ndbc <- fetch_ndbc_hourly_snapshots(
+  param = "sea_water_temperature",
+  value_col = "temperature"
+)
+
+salinity_data <- sal_ndbc$latest |> filter(!is.na(salinity))
+temperature_data <- temp_ndbc$latest |> filter(!is.na(temperature))
+
+ref_date_label <- format(sal_ndbc$reference_date, "%Y-%m-%d")
+data_as_of_label <- format_ndbc_time(sal_ndbc$data_as_of)
+report_time <- format(Sys.time(), "%Y-%m-%d %H:%M %Z", tz = ndbc_display_tz)
+
+salinity_fields <- interpolate_or_load_fields(
+  sal_ndbc$snapshots,
+  value_col = "salinity"
+)
+temperature_fields <- interpolate_or_load_fields(
+  temp_ndbc$snapshots,
+  value_col = "temperature"
+)
+
+salinity_palette <- c(
+  "#2166ac", "#67a9cf", "#d1e5f0",
+  "#fddbc7", "#ef8a62", "#b2182b"
+)
+temperature_palette <- c(
+  "#313695", "#74add1", "#abd9e9",
+  "#fee090", "#f46d43", "#a50026"
+)
+
+sal_range <- field_value_range(salinity_fields, "salinity")
+temp_range <- field_value_range(temperature_fields, "temperature")
+mean_salinity <- mean(salinity_data$salinity, na.rm = TRUE)
+mean_temperature <- mean(temperature_data$temperature, na.rm = TRUE)
+```
+
+::: {.content-visible when-format="dashboard"}
+Paired **salinity** and **temperature** maps from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html) buoys, interpolated with **DIVAnd** and bathymetry masking.
+**Report:** `r report_time` · **Latest data:** `r data_as_of_label` · **Reference day:** `r ref_date_label`
+:::
+
+# Latest Readings
+
+## Row
+
+```{r}
+#| content: valuebox
+#| title: Mean salinity
+#| icon: droplet-half
+#| color: info
+list(value = sprintf("%.1f PSU", mean_salinity))
+```
+
+```{r}
+#| content: valuebox
+#| title: Mean temperature
+#| icon: thermometer-half
+#| color: warning
+list(value = sprintf("%.1f °C", mean_temperature))
+```
+
+```{r}
+#| content: valuebox
+#| title: Reference day
+#| icon: calendar3
+#| color: secondary
+list(value = ref_date_label)
+```
+
+## Row {height=70%}
+
+```{r latest-salinity-map}
+#| title: Latest salinity
+#| padding: 0px
+
+if (nrow(salinity_data) == 0) {
+  stop("No salinity data returned from ERDDAP.")
+}
+
+sal_pal <- colorNumeric(salinity_palette, salinity_data$salinity, na.color = "#999999")
+
+leaflet(salinity_data) |>
+  addProviderTiles("CartoDB.Positron") |>
+  setView(
+    lng = mean(salinity_data$longitude),
+    lat = mean(salinity_data$latitude),
+    zoom = 9
+  ) |>
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 8,
+    stroke = TRUE,
+    weight = 1,
+    color = "#333333",
+    fillColor = ~sal_pal(salinity),
+    fillOpacity = 0.85,
+    label = ~sprintf("%s: %.1f PSU\n%s", location, salinity, format_ndbc_time(time))
+  ) |>
+  addLegend(
+    position = "bottomright",
+    pal = sal_pal,
+    values = salinity_data$salinity,
+    title = "Salinity (PSU)",
+    opacity = 0.9
+  )
+```
+
+```{r latest-temperature-map}
+#| title: Latest temperature
+#| padding: 0px
+
+if (nrow(temperature_data) == 0) {
+  stop("No temperature data returned from ERDDAP.")
+}
+
+temp_pal <- colorNumeric(
+  temperature_palette,
+  temperature_data$temperature,
+  na.color = "#999999"
+)
+
+leaflet(temperature_data) |>
+  addProviderTiles("CartoDB.Positron") |>
+  setView(
+    lng = mean(temperature_data$longitude),
+    lat = mean(temperature_data$latitude),
+    zoom = 9
+  ) |>
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 8,
+    stroke = TRUE,
+    weight = 1,
+    color = "#333333",
+    fillColor = ~temp_pal(temperature),
+    fillOpacity = 0.85,
+    label = ~sprintf("%s: %.1f °C\n%s", location, temperature, format_ndbc_time(time))
+  ) |>
+  addLegend(
+    position = "bottomright",
+    pal = temp_pal,
+    values = temperature_data$temperature,
+    title = "Temperature (°C)",
+    opacity = 0.9
+  )
+```
+
+# Interpolated Maps {scrolling="true"}
+
+## Row {.flow}
+
+::: {.dashboard-separator}
+Paired hourly fields : Toggle through times to view side-by-side.
+:::
+
+## Row {.tabset}
+
+```{r paired-06}
+#| title: 06:00 ET
+
+plot_ndbc_hour_pair(
+  salinity_fields[[1]],
+  temperature_fields[[1]],
+  sal_value_range = sal_range,
+  temp_value_range = temp_range,
+  sal_palette = salinity_palette,
+  temp_palette = temperature_palette,
+  show_sal_legend = TRUE,
+  show_temp_legend = TRUE,
+  show_hour_label = FALSE,
+  label_fn = format_hour_panel_label
+)
+```
+
+```{r paired-12}
+#| title: 12:00 ET
+
+plot_ndbc_hour_pair(
+  salinity_fields[[2]],
+  temperature_fields[[2]],
+  sal_value_range = sal_range,
+  temp_value_range = temp_range,
+  sal_palette = salinity_palette,
+  temp_palette = temperature_palette,
+  show_sal_legend = TRUE,
+  show_temp_legend = TRUE,
+  show_hour_label = FALSE,
+  label_fn = format_hour_panel_label
+)
+```
+
+```{r paired-18}
+#| title: 18:00 ET
+
+plot_ndbc_hour_pair(
+  salinity_fields[[3]],
+  temperature_fields[[3]],
+  sal_value_range = sal_range,
+  temp_value_range = temp_range,
+  sal_palette = salinity_palette,
+  temp_palette = temperature_palette,
+  show_sal_legend = TRUE,
+  show_temp_legend = TRUE,
+  show_hour_label = FALSE,
+  label_fn = format_hour_panel_label
+)
+```
+
+```{r paired-24}
+#| title: 24:00 ET
+
+plot_ndbc_hour_pair(
+  salinity_fields[[4]],
+  temperature_fields[[4]],
+  sal_value_range = sal_range,
+  temp_value_range = temp_range,
+  sal_palette = salinity_palette,
+  temp_palette = temperature_palette,
+  show_sal_legend = TRUE,
+  show_temp_legend = TRUE,
+  show_hour_label = FALSE,
+  label_fn = format_hour_panel_label
+)
+```
+
+## Row
+
+```{r paired-all, results='asis'}
+#| title: All hours (stacked)
+
+if (all(vapply(salinity_fields, function(x) is.null(x$field) || nrow(x$field) == 0, logical(1))) ||
+    all(vapply(temperature_fields, function(x) is.null(x$field) || nrow(x$field) == 0, logical(1)))) {
+  stop("No interpolated salinity or temperature fields were produced.")
+}
+
+plot_ndbc_paired_field_panels(
+  salinity_fields,
+  temperature_fields,
+  sal_palette = salinity_palette,
+  temp_palette = temperature_palette,
+  label_fn = format_hour_panel_label
+)
+```
