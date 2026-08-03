@@ -120,6 +120,30 @@
   align-items: start;
 }
 
+.ndbc-paired-labels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2%;
+  margin-bottom: 4px;
+}
+
+.ndbc-paired-labels .ndbc-field-panel-label {
+  margin: 0;
+}
+
+.ndbc-sync-maps {
+  width: 100%;
+}
+
+.ndbc-sync-maps .ndbc-field-panel {
+  min-width: 0;
+}
+
+.ndbc-sync-maps .leaflet.html-widget,
+.ndbc-sync-maps .leaflet-container {
+  width: 100% !important;
+}
+
 @media (max-width: 900px) {
   .ndbc-paired-row {
     grid-template-columns: 1fr;
