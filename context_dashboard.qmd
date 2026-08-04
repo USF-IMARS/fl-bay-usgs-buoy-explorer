@@ -1,0 +1,254 @@
+---
+title: "Current vs Usual"
+subtitle: "How do today's buoy conditions compare to the past year?"
+author: "USGS / SECOORA ERDDAP"
+format:
+  dashboard:
+    theme: cosmo
+    css: styles.css
+    nav-buttons:
+      - icon: github
+        href: https://github.com/usf-imars/fl-bay-usgs-buoy-explorer
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| output: false
+
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+source("R/fetch_ndbc_history.R")
+source("R/plot_ndbc_context.R")
+
+lookback_days <- 365
+recent_days <- 30
+
+history_raw <- fetch_ndbc_network_history(lookback_days = lookback_days)
+data_as_of <- fetch_ndbc_erddap_end_time()
+data_as_of_label <- format_ndbc_time(data_as_of)
+report_time <- format(Sys.time(), "%Y-%m-%d %H:%M %Z", tz = ndbc_display_tz)
+
+sal_history <- prepare_ndbc_history(history_raw$salinity, "salinity")
+temp_history <- prepare_ndbc_history(history_raw$temperature, "temperature")
+
+sal_latest <- latest_ndbc_readings(sal_history, "salinity")
+temp_latest <- latest_ndbc_readings(temp_history, "temperature")
+
+sal_summary <- station_context_summary(sal_history, sal_latest, "salinity")
+temp_summary <- station_context_summary(temp_history, temp_latest, "temperature")
+
+sal_counts <- network_context_counts(sal_summary)
+temp_counts <- network_context_counts(temp_summary)
+
+sal_daily <- network_daily_means(sal_history, "salinity")
+temp_daily <- network_daily_means(temp_history, "temperature")
+
+sal_clim <- doy_climatology(sal_history, "salinity")
+temp_clim <- doy_climatology(temp_history, "temperature")
+
+example_station <- sal_summary |>
+  filter(!is.na(percentile)) |>
+  arrange(abs(percentile - 50)) |>
+  slice(1)
+
+example_label <- if (nrow(example_station) > 0) {
+  example_station$station[1]
+} else {
+  "Buoy_Key"
+}
+
+example_id <- if (nrow(example_station) > 0) {
+  example_station$station_id[1]
+} else {
+  "bkyf1"
+}
+```
+
+::: {.content-visible when-format="dashboard"}
+**Usual** = each buoy's readings over the past **`r lookback_days` days**, compared by **day of year** (10th–90th percentile band). Data from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html). **Report:** `r report_time` · **Latest data:** `r data_as_of_label`
+:::
+
+# Overview
+
+## Row
+
+```{r}
+#| content: valuebox
+#| title: High salinity buoys
+#| icon: arrow-up-circle
+#| color: warning
+list(value = sal_counts$n_high)
+```
+
+```{r}
+#| content: valuebox
+#| title: Usual salinity buoys
+#| icon: check-circle
+#| color: success
+list(value = sal_counts$n_usual)
+```
+
+```{r}
+#| content: valuebox
+#| title: High temperature buoys
+#| icon: thermometer-high
+#| color: danger
+list(value = temp_counts$n_high)
+```
+
+```{r}
+#| content: valuebox
+#| title: Usual temperature buoys
+#| icon: thermometer-half
+#| color: info
+list(value = temp_counts$n_usual)
+```
+
+## Row {height=40%}
+
+::: {.card title="How to read this dashboard"}
+A buoy is **low** when its latest reading falls below the 10th percentile of its own past-year record; **high** when above the 90th percentile; **usual** otherwise. This is not a fixed salinity/temperature threshold — it adapts to each station's history and season.
+
+Distribution plots show the full past-year record (all buoys pooled). Time series show the **network mean** daily value with a band for the usual range on each day of year. Station bars show where today's reading ranks at each buoy (0 = lowest on record, 100 = highest).
+:::
+
+# Salinity
+
+## Row {height=55%}
+
+```{r sal-distribution}
+#| title: Past-year salinity distribution
+#| fig-width: 7
+#| fig-height: 5
+
+if (nrow(sal_history) == 0) {
+  stop("No salinity history returned from ERDDAP.")
+}
+
+plot_context_distribution(
+  sal_history,
+  sal_latest,
+  value_col = "salinity",
+  title = "Salinity distribution (past year)",
+  unit = "Salinity (PSU)"
+)
+```
+
+```{r sal-percentiles}
+#| title: Latest salinity percentile by buoy
+#| fig-width: 7
+#| fig-height: 5
+
+plot_station_percentiles(
+  sal_summary,
+  value_col = "salinity",
+  title = "Where today falls in each buoy's history",
+  unit = "Salinity (PSU)"
+)
+```
+
+## Row {height=45%}
+
+```{r sal-network-ts}
+#| title: Network mean salinity (30 days)
+#| fig-width: 7
+#| fig-height: 4
+
+plot_context_timeseries(
+  sal_daily,
+  sal_clim,
+  value_col = "salinity",
+  title = "Network daily salinity vs usual",
+  unit = "Salinity (PSU)",
+  recent_days = recent_days
+)
+```
+
+```{r sal-station-ts}
+#| title: Example buoy time series
+#| fig-width: 7
+#| fig-height: 4
+
+plot_station_context_ts(
+  sal_history,
+  sal_clim,
+  station_id = example_id,
+  value_col = "salinity",
+  title = paste("Daily salinity:", example_label),
+  unit = "Salinity (PSU)",
+  recent_days = recent_days
+)
+```
+
+# Temperature
+
+## Row {height=55%}
+
+```{r temp-distribution}
+#| title: Past-year temperature distribution
+#| fig-width: 7
+#| fig-height: 5
+
+if (nrow(temp_history) == 0) {
+  stop("No temperature history returned from ERDDAP.")
+}
+
+plot_context_distribution(
+  temp_history,
+  temp_latest,
+  value_col = "temperature",
+  title = "Temperature distribution (past year)",
+  unit = "Temperature (°C)"
+)
+```
+
+```{r temp-percentiles}
+#| title: Latest temperature percentile by buoy
+#| fig-width: 7
+#| fig-height: 5
+
+plot_station_percentiles(
+  temp_summary,
+  value_col = "temperature",
+  title = "Where today falls in each buoy's history",
+  unit = "Temperature (°C)"
+)
+```
+
+## Row {height=45%}
+
+```{r temp-network-ts}
+#| title: Network mean temperature (30 days)
+#| fig-width: 7
+#| fig-height: 4
+
+plot_context_timeseries(
+  temp_daily,
+  temp_clim,
+  value_col = "temperature",
+  title = "Network daily temperature vs usual",
+  unit = "Temperature (°C)",
+  recent_days = recent_days
+)
+```
+
+```{r temp-station-ts}
+#| title: Example buoy time series
+#| fig-width: 7
+#| fig-height: 4
+
+plot_station_context_ts(
+  temp_history,
+  clim_df = temp_clim,
+  station_id = example_id,
+  value_col = "temperature",
+  title = paste("Daily temperature:", example_label),
+  unit = "Temperature (°C)",
+  recent_days = recent_days
+)
+```

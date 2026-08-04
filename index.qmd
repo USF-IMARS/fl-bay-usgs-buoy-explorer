@@ -12,6 +12,7 @@ This site hosts static [Quarto dashboards](https://quarto.org/docs/dashboards/) 
 
 ## Dashboards
 
+- [**Current vs Usual →**](context_dashboard.html) — compare today's readings to each buoy's past-year distribution and seasonal range
 - [**Salinity & Temperature Maps →**](maps_dashboard.html) — paired salinity and temperature maps side by side, with hourly interpolated fields
 - [**Salinity Dashboard →**](dashboard.html) — salinity overview, interpolated fields, and station gauges
 

@@ -12,6 +12,8 @@ website:
         text: Salinity Dashboard
       - href: maps_dashboard.qmd
         text: Salinity & Temperature Maps
+      - href: context_dashboard.qmd
+        text: Current vs Usual
     right:
       - icon: github
         href: https://github.com/usf-imars/fl-bay-usgs-buoy-explorer
