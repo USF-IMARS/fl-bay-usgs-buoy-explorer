@@ -12,14 +12,24 @@ plot_context_distribution <- function(
     latest_df,
     value_col,
     title,
-    unit
+    unit,
+    qc_label = NULL
 ) {
   if (nrow(history_df) == 0) {
     return(NULL)
   }
 
+  if (is.null(qc_label)) {
+    qc_label <- ndbc_qc_label(value_col)
+  }
+
   current <- latest_df[[value_col]]
   current <- current[!is.na(current)]
+  q_lines <- stats::quantile(
+    history_df[[value_col]],
+    c(0.1, 0.5, 0.9),
+    na.rm = TRUE
+  )
 
   ggplot2::ggplot(
     history_df,
@@ -34,11 +44,7 @@ plot_context_distribution <- function(
     ) +
     ggplot2::geom_density(color = "#08519c", linewidth = 0.8) +
     ggplot2::geom_vline(
-      xintercept = stats::quantile(
-        history_df[[value_col]],
-        c(0.1, 0.5, 0.9),
-        na.rm = TRUE
-      ),
+      xintercept = q_lines,
       linetype = "dashed",
       color = "#636363",
       linewidth = 0.5
@@ -53,7 +59,9 @@ plot_context_distribution <- function(
     ggplot2::labs(
       title = title,
       subtitle = sprintf(
-        "Gray dashed lines: 10th / 50th / 90th percentile of the past year (all buoys). Orange: latest readings (%d buoys).",
+        "QC range %s (%s). Gray dashed lines: 10th / 50th / 90th percentile after removing sentinel and out-of-range values. Orange: latest readings (%d buoys).",
+        qc_label,
+        unit,
         length(current)
       ),
       x = unit,
@@ -110,7 +118,7 @@ plot_station_percentiles <- function(
     ggplot2::coord_flip() +
     ggplot2::labs(
       title = title,
-      subtitle = "Where the latest reading falls in each buoy's past-year distribution (0 = lowest, 100 = highest).",
+      subtitle = "Where the latest reading falls in each buoy's QC-filtered past-year distribution (0 = lowest, 100 = highest).",
       x = NULL,
       y = "Percentile rank"
     ) +
@@ -128,18 +136,40 @@ plot_context_timeseries <- function(
     value_col,
     title,
     unit,
-    recent_days = 30
+    recent_days = 30,
+    subtitle = NULL
 ) {
   if (nrow(daily_df) == 0 || nrow(clim_df) == 0) {
     return(NULL)
   }
 
-  recent_cutoff <- max(daily_df$date, na.rm = TRUE) - recent_days
-  recent <- daily_df |>
-    dplyr::filter(.data$date >= recent_cutoff) |>
+  plot_df <- if (is.null(recent_days)) {
+    daily_df
+  } else {
+    recent_cutoff <- max(daily_df$date, na.rm = TRUE) - recent_days
+    daily_df |>
+      dplyr::filter(.data$date >= recent_cutoff)
+  }
+
+  plot_df <- plot_df |>
     dplyr::left_join(clim_df, by = "doy")
 
-  ggplot2::ggplot(recent, ggplot2::aes(x = .data$date)) +
+  if (is.null(subtitle)) {
+    subtitle <- if (is.null(recent_days)) {
+      sprintf(
+        "Network mean daily %s for the full past year. Shaded band = usual range (10th–90th percentile by day of year across buoys); dashed = climatological median.",
+        tolower(gsub("\\(.*\\)", "", unit))
+      )
+    } else {
+      sprintf(
+        "Network mean daily %s over the last %d days. Band = usual range (10th–90th percentile by day of year); dashed = median.",
+        tolower(gsub("\\(.*\\)", "", unit)),
+        recent_days
+      )
+    }
+  }
+
+  ggplot2::ggplot(plot_df, ggplot2::aes(x = .data$date)) +
     ggplot2::geom_ribbon(
       ggplot2::aes(ymin = .data$p10, ymax = .data$p90),
       fill = "#c6dbef",
@@ -154,24 +184,20 @@ plot_context_timeseries <- function(
     ggplot2::geom_line(
       ggplot2::aes(y = .data$value),
       color = "#08519c",
-      linewidth = 0.9
+      linewidth = if (is.null(recent_days)) 0.7 else 0.9
     ) +
     ggplot2::geom_point(
       ggplot2::aes(y = .data$value),
       color = "#08519c",
-      size = 1.2
+      size = if (is.null(recent_days)) 0.8 else 1.2
     ) +
     ggplot2::labs(
       title = title,
-      subtitle = sprintf(
-        "Network mean daily %s over the last %d days. Band = usual range (10th–90th percentile by day of year); dashed = median.",
-        tolower(gsub("\\(.*\\)", "", unit)),
-        recent_days
-      ),
+      subtitle = subtitle,
       x = NULL,
       y = unit
     ) +
-    ggplot2::scale_x_date(date_labels = "%b %d") +
+    ggplot2::scale_x_date(date_labels = if (is.null(recent_days)) "%b %Y" else "%b %d") +
     ggplot2::theme_minimal(base_size = 11) +
     ggplot2::theme(
       plot.title = ggplot2::element_text(face = "bold"),
@@ -179,75 +205,30 @@ plot_context_timeseries <- function(
     )
 }
 
-plot_station_context_ts <- function(
-    history_df,
-    clim_df,
-    station_id,
-    value_col,
-    title,
-    unit,
-    recent_days = 30
-) {
-  station_df <- history_df |>
-    dplyr::filter(.data$station_id == .env$station_id)
-
-  if (nrow(station_df) == 0) {
-    return(NULL)
+format_network_context <- function(ctx, unit, digits = 1) {
+  if (length(ctx) == 0 || is.na(ctx$latest_value)) {
+    return("Network mean unavailable.")
   }
 
-  daily <- station_df |>
-    dplyr::group_by(.data$date, .data$doy) |>
-    dplyr::summarize(
-      value = mean(.data[[value_col]], na.rm = TRUE),
-      .groups = "drop"
-    )
+  pct_label <- if (is.na(ctx$year_percentile)) {
+    "n/a"
+  } else {
+    sprintf("%.0f", ctx$year_percentile)
+  }
 
-  recent_cutoff <- max(daily$date, na.rm = TRUE) - recent_days
-  station_clim <- station_df |>
-    dplyr::group_by(.data$doy) |>
-    dplyr::summarize(
-      p10 = stats::quantile(.data[[value_col]], 0.1, na.rm = TRUE),
-      p50 = stats::quantile(.data[[value_col]], 0.5, na.rm = TRUE),
-      p90 = stats::quantile(.data[[value_col]], 0.9, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  recent <- daily |>
-    dplyr::filter(.data$date >= recent_cutoff) |>
-    dplyr::left_join(station_clim, by = "doy")
-
-  ggplot2::ggplot(recent, ggplot2::aes(x = .data$date)) +
-    ggplot2::geom_ribbon(
-      ggplot2::aes(ymin = .data$p10, ymax = .data$p90),
-      fill = "#fee0d2",
-      alpha = 0.8
-    ) +
-    ggplot2::geom_line(
-      ggplot2::aes(y = .data$p50),
-      color = "#636363",
-      linewidth = 0.5,
-      linetype = "dashed"
-    ) +
-    ggplot2::geom_line(
-      ggplot2::aes(y = .data$value),
-      color = "#a63603",
-      linewidth = 0.9
-    ) +
-    ggplot2::geom_point(
-      ggplot2::aes(y = .data$value),
-      color = "#a63603",
-      size = 1.2
-    ) +
-    ggplot2::labs(
-      title = title,
-      subtitle = sprintf("Daily %s with station-specific usual range (past year by day of year).", tolower(unit)),
-      x = NULL,
-      y = unit
-    ) +
-    ggplot2::scale_x_date(date_labels = "%b %d") +
-    ggplot2::theme_minimal(base_size = 11) +
-    ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold"),
-      panel.grid.minor = ggplot2::element_blank()
-    )
+  sprintf(
+    "Latest network mean: **%.1f %s** on %s (%d buoys). Today's usual range: %.1f–%.1f %s (median %.1f). This sits at the **%sth percentile** of network daily means over the past year (year mean %.1f; range %.1f–%.1f).",
+    ctx$latest_value,
+    unit,
+    format(ctx$latest_date, "%Y-%m-%d"),
+    ctx$n_stations,
+    ctx$clim_p10,
+    ctx$clim_p90,
+    unit,
+    ctx$clim_p50,
+    pct_label,
+    ctx$year_mean,
+    ctx$year_min,
+    ctx$year_max
+  )
 }

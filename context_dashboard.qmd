@@ -26,7 +26,6 @@ source("R/fetch_ndbc_history.R")
 source("R/plot_ndbc_context.R")
 
 lookback_days <- 365
-recent_days <- 30
 
 history_raw <- fetch_ndbc_network_history(lookback_days = lookback_days)
 data_as_of <- fetch_ndbc_erddap_end_time()
@@ -51,22 +50,11 @@ temp_daily <- network_daily_means(temp_history, "temperature")
 sal_clim <- doy_climatology(sal_history, "salinity")
 temp_clim <- doy_climatology(temp_history, "temperature")
 
-example_station <- sal_summary |>
-  filter(!is.na(percentile)) |>
-  arrange(abs(percentile - 50)) |>
-  slice(1)
+sal_network_ctx <- network_daily_context(sal_daily, sal_clim, "salinity")
+temp_network_ctx <- network_daily_context(temp_daily, temp_clim, "temperature")
 
-example_label <- if (nrow(example_station) > 0) {
-  example_station$station[1]
-} else {
-  "Buoy_Key"
-}
-
-example_id <- if (nrow(example_station) > 0) {
-  example_station$station_id[1]
-} else {
-  "bkyf1"
-}
+sal_qc_label <- ndbc_qc_label("salinity")
+temp_qc_label <- ndbc_qc_label("temperature")
 ```
 
 ::: {.content-visible when-format="dashboard"}
@@ -114,7 +102,9 @@ list(value = temp_counts$n_usual)
 ::: {.card title="How to read this dashboard"}
 A buoy is **low** when its latest reading falls below the 10th percentile of its own past-year record; **high** when above the 90th percentile; **usual** otherwise. This is not a fixed salinity/temperature threshold — it adapts to each station's history and season.
 
-Distribution plots show the full past-year record (all buoys pooled). Time series show the **network mean** daily value with a band for the usual range on each day of year. Station bars show where today's reading ranks at each buoy (0 = lowest on record, 100 = highest).
+Distribution plots show the QC-filtered past-year record (all buoys pooled). The full-year time series shows the **network mean** — the average of each day's valid buoy readings — with a band for the usual range on each day of year. Station bars show where today's reading ranks at each buoy (0 = lowest on record, 100 = highest).
+
+Outliers and sentinel values are removed before analysis (salinity `r sal_qc_label` PSU; temperature `r temp_qc_label` °C).
 :::
 
 # Salinity
@@ -123,7 +113,7 @@ Distribution plots show the full past-year record (all buoys pooled). Time serie
 
 ```{r sal-distribution}
 #| title: Past-year salinity distribution
-#| fig-width: 7
+#| fig-width: 14
 #| fig-height: 5
 
 if (nrow(sal_history) == 0) {
@@ -141,7 +131,7 @@ plot_context_distribution(
 
 ```{r sal-percentiles}
 #| title: Latest salinity percentile by buoy
-#| fig-width: 7
+#| fig-width: 14
 #| fig-height: 5
 
 plot_station_percentiles(
@@ -152,36 +142,26 @@ plot_station_percentiles(
 )
 ```
 
-## Row {height=45%}
+## Row {height=50%}
 
-```{r sal-network-ts}
-#| title: Network mean salinity (30 days)
-#| fig-width: 7
-#| fig-height: 4
+::: {.card title="Network mean salinity"}
+`r format_network_context(sal_network_ctx, "PSU")`
+
+The **network mean** averages all valid buoy readings each day. The shaded band on the chart shows the across-buoy usual range for that calendar day (10th–90th percentile by day of year); the dashed line is the climatological median.
+:::
+
+```{r sal-network-year}
+#| title: Network mean — full past year
+#| fig-width: 14
+#| fig-height: 4.5
 
 plot_context_timeseries(
   sal_daily,
   sal_clim,
   value_col = "salinity",
-  title = "Network daily salinity vs usual",
+  title = "Full-year network salinity",
   unit = "Salinity (PSU)",
-  recent_days = recent_days
-)
-```
-
-```{r sal-station-ts}
-#| title: Example buoy time series
-#| fig-width: 7
-#| fig-height: 4
-
-plot_station_context_ts(
-  sal_history,
-  sal_clim,
-  station_id = example_id,
-  value_col = "salinity",
-  title = paste("Daily salinity:", example_label),
-  unit = "Salinity (PSU)",
-  recent_days = recent_days
+  recent_days = NULL
 )
 ```
 
@@ -191,7 +171,7 @@ plot_station_context_ts(
 
 ```{r temp-distribution}
 #| title: Past-year temperature distribution
-#| fig-width: 7
+#| fig-width: 14
 #| fig-height: 5
 
 if (nrow(temp_history) == 0) {
@@ -209,7 +189,7 @@ plot_context_distribution(
 
 ```{r temp-percentiles}
 #| title: Latest temperature percentile by buoy
-#| fig-width: 7
+#| fig-width: 14
 #| fig-height: 5
 
 plot_station_percentiles(
@@ -220,35 +200,25 @@ plot_station_percentiles(
 )
 ```
 
-## Row {height=45%}
+## Row {height=50%}
 
-```{r temp-network-ts}
-#| title: Network mean temperature (30 days)
-#| fig-width: 7
-#| fig-height: 4
+::: {.card title="Network mean temperature"}
+`r format_network_context(temp_network_ctx, "°C")`
+
+The **network mean** averages all valid buoy readings each day. The shaded band on the chart shows the across-buoy usual range for that calendar day (10th–90th percentile by day of year); the dashed line is the climatological median.
+:::
+
+```{r temp-network-year}
+#| title: Network mean — full past year
+#| fig-width: 14
+#| fig-height: 4.5
 
 plot_context_timeseries(
   temp_daily,
   temp_clim,
   value_col = "temperature",
-  title = "Network daily temperature vs usual",
+  title = "Full-year network temperature",
   unit = "Temperature (°C)",
-  recent_days = recent_days
-)
-```
-
-```{r temp-station-ts}
-#| title: Example buoy time series
-#| fig-width: 7
-#| fig-height: 4
-
-plot_station_context_ts(
-  temp_history,
-  clim_df = temp_clim,
-  station_id = example_id,
-  value_col = "temperature",
-  title = paste("Daily temperature:", example_label),
-  unit = "Temperature (°C)",
-  recent_days = recent_days
+  recent_days = NULL
 )
 ```

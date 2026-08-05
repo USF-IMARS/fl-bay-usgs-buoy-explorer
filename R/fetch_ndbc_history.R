@@ -34,13 +34,38 @@ fetch_ndbc_network_history <- function(
     stats::setNames(names(ndbc_param_specs))
 }
 
+ndbc_valid_range <- function(value_col) {
+  switch(
+    value_col,
+    salinity = c(5, 55),
+    temperature = c(10, 40),
+    c(-Inf, Inf)
+  )
+}
+
+filter_ndbc_values <- function(df, value_col) {
+  if (is.null(df) || nrow(df) == 0) {
+    return(df)
+  }
+
+  rng <- ndbc_valid_range(value_col)
+  df |>
+    dplyr::filter(
+      !is.na(.data[[value_col]]),
+      is.finite(.data[[value_col]]),
+      abs(.data[[value_col]]) < 1e3,
+      .data[[value_col]] >= rng[1],
+      .data[[value_col]] <= rng[2]
+    )
+}
+
 prepare_ndbc_history <- function(df, value_col, tz = ndbc_display_tz) {
   if (is.null(df) || nrow(df) == 0) {
     return(dplyr::tibble())
   }
 
   df |>
-    dplyr::filter(!is.na(.data[[value_col]])) |>
+    filter_ndbc_values(value_col) |>
     dplyr::mutate(
       time = as.POSIXct(time, tz = "UTC"),
       date = as.Date(time, tz = tz),
@@ -151,4 +176,40 @@ network_context_counts <- function(summary_df) {
     n_missing = sum(summary_df$status == "missing", na.rm = TRUE),
     median_percentile = stats::median(summary_df$percentile, na.rm = TRUE)
   )
+}
+
+network_daily_context <- function(daily_df, clim_df, value_col) {
+  if (nrow(daily_df) == 0) {
+    return(list())
+  }
+
+  latest <- daily_df |>
+    dplyr::arrange(dplyr::desc(.data$date)) |>
+    dplyr::slice(1)
+  clim_today <- clim_df |>
+    dplyr::filter(.data$doy == latest$doy)
+
+  year_pct <- if (nrow(daily_df) > 1) {
+    100 * stats::ecdf(daily_df$value)(latest$value)
+  } else {
+    NA_real_
+  }
+
+  list(
+    latest_date = latest$date,
+    latest_value = latest$value,
+    n_stations = latest$n_stations,
+    clim_p10 = if (nrow(clim_today) > 0) clim_today$p10[1] else NA_real_,
+    clim_p50 = if (nrow(clim_today) > 0) clim_today$p50[1] else NA_real_,
+    clim_p90 = if (nrow(clim_today) > 0) clim_today$p90[1] else NA_real_,
+    year_percentile = year_pct,
+    year_mean = mean(daily_df$value, na.rm = TRUE),
+    year_min = min(daily_df$value, na.rm = TRUE),
+    year_max = max(daily_df$value, na.rm = TRUE)
+  )
+}
+
+ndbc_qc_label <- function(value_col) {
+  rng <- ndbc_valid_range(value_col)
+  sprintf("%.0f–%.0f", rng[1], rng[2])
 }
