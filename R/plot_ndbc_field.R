@@ -402,6 +402,38 @@ sync_leaflet_pair <- function(map1, map2) {
   )
 }
 
+plot_ndbc_hour_field <- function(
+    field_result,
+    value_col,
+    legend_title,
+    popup_suffix = "",
+    palette = viridisLite::turbo(256),
+    value_range = NULL,
+    height = 420
+) {
+  if (is.null(field_result$field) || nrow(field_result$field) == 0) {
+    return(htmltools::tags$p(class = "ndbc-field-panel-empty", "No data for this hour."))
+  }
+
+  plot_ndbc_field(
+    field_result$field,
+    field_result$observations,
+    value_col = value_col,
+    legend_title = legend_title,
+    popup_suffix = popup_suffix,
+    palette = palette,
+    height = height,
+    value_range = value_range,
+    show_legend = TRUE,
+    show_scale_bar = FALSE,
+    show_layers_control = FALSE,
+    prefer_canvas = TRUE,
+    show_marker_labels = FALSE,
+    interactive_grid = FALSE,
+    use_svg_markers = TRUE
+  )
+}
+
 plot_ndbc_hour_pair <- function(
     sal_result,
     temp_result,

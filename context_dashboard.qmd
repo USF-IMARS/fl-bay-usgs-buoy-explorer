@@ -20,10 +20,15 @@ execute:
 
 library(dplyr)
 library(ggplot2)
+library(htmltools)
+library(leaflet)
 library(scales)
 
 source("R/fetch_ndbc_history.R")
+source("R/fetch_ndbc_observations.R")
 source("R/plot_ndbc_context.R")
+source("R/plot_ndbc_field.R")
+source("R/load_field_data.R")
 
 lookback_days <- 365
 
@@ -55,6 +60,40 @@ temp_network_ctx <- network_daily_context(temp_daily, temp_clim, "temperature")
 
 sal_qc_label <- ndbc_qc_label("salinity")
 temp_qc_label <- ndbc_qc_label("temperature")
+
+sal_ndbc <- fetch_ndbc_hourly_snapshots(
+  param = "sea_water_practical_salinity",
+  value_col = "salinity"
+)
+temp_ndbc <- fetch_ndbc_hourly_snapshots(
+  param = "sea_water_temperature",
+  value_col = "temperature"
+)
+
+ref_date_label <- format(sal_ndbc$reference_date, "%Y-%m-%d")
+
+salinity_fields <- interpolate_or_load_fields(
+  sal_ndbc$snapshots,
+  value_col = "salinity"
+)
+temperature_fields <- interpolate_or_load_fields(
+  temp_ndbc$snapshots,
+  value_col = "temperature"
+)
+
+salinity_palette <- c(
+  "#2166ac", "#67a9cf", "#d1e5f0",
+  "#fddbc7", "#ef8a62", "#b2182b"
+)
+temperature_palette <- c(
+  "#313695", "#74add1", "#abd9e9",
+  "#fee090", "#f46d43", "#a50026"
+)
+
+sal_field_range <- field_value_range(salinity_fields, "salinity")
+temp_field_range <- field_value_range(temperature_fields, "temperature")
+sal_range <- sal_field_range
+temp_range <- temp_field_range
 ```
 
 ::: {.content-visible when-format="dashboard"}
@@ -97,12 +136,26 @@ list(value = temp_counts$n_high)
 list(value = temp_counts$n_usual)
 ```
 
+## Row {height=35%}
+
+::: {.card title="Network mean salinity"}
+`r format_network_context(sal_network_ctx, "PSU")`
+
+The **network mean** averages all valid buoy readings each day. The shaded band on the full-year chart shows the across-buoy usual range for that calendar day (10th–90th percentile by day of year); the dashed line is the climatological median.
+:::
+
+::: {.card title="Network mean temperature"}
+`r format_network_context(temp_network_ctx, "°C")`
+
+The **network mean** averages all valid buoy readings each day. The shaded band on the full-year chart shows the across-buoy usual range for that calendar day (10th–90th percentile by day of year); the dashed line is the climatological median.
+:::
+
 ## Row {height=40%}
 
 ::: {.card title="How to read this dashboard"}
 A buoy is **low** when its latest reading falls below the 10th percentile of its own past-year record; **high** when above the 90th percentile; **usual** otherwise. This is not a fixed salinity/temperature threshold — it adapts to each station's history and season.
 
-Distribution plots show the QC-filtered past-year record (all buoys pooled). The full-year time series shows the **network mean** — the average of each day's valid buoy readings — with a band for the usual range on each day of year. Station bars show where today's reading ranks at each buoy (0 = lowest on record, 100 = highest).
+Distribution plots show the QC-filtered past-year record (all buoys pooled). Station bars show where today's reading ranks at each buoy (0 = lowest on record, 100 = highest). Interpolated maps show **DIVAnd** hourly fields on `r ref_date_label` for the variable on each page.
 
 Outliers and sentinel values are removed before analysis (salinity `r sal_qc_label` PSU; temperature `r temp_qc_label` °C).
 :::
@@ -144,11 +197,65 @@ plot_station_percentiles(
 
 ## Row {height=50%}
 
-::: {.card title="Network mean salinity"}
-`r format_network_context(sal_network_ctx, "PSU")`
+### Column {width=50%} {.tabset}
 
-The **network mean** averages all valid buoy readings each day. The shaded band on the chart shows the across-buoy usual range for that calendar day (10th–90th percentile by day of year); the dashed line is the climatological median.
-:::
+```{r sal-field-06}
+#| title: 06:00 ET
+#| padding: 0px
+
+plot_ndbc_hour_field(
+  salinity_fields[[1]],
+  value_col = "salinity",
+  legend_title = "Salinity (PSU)",
+  popup_suffix = " PSU",
+  palette = salinity_palette,
+  value_range = sal_range
+)
+```
+
+```{r sal-field-12}
+#| title: 12:00 ET
+#| padding: 0px
+
+plot_ndbc_hour_field(
+  salinity_fields[[2]],
+  value_col = "salinity",
+  legend_title = "Salinity (PSU)",
+  popup_suffix = " PSU",
+  palette = salinity_palette,
+  value_range = sal_range
+)
+```
+
+```{r sal-field-18}
+#| title: 18:00 ET
+#| padding: 0px
+
+plot_ndbc_hour_field(
+  salinity_fields[[3]],
+  value_col = "salinity",
+  legend_title = "Salinity (PSU)",
+  popup_suffix = " PSU",
+  palette = salinity_palette,
+  value_range = sal_range
+)
+```
+
+```{r sal-field-24}
+#| title: 24:00 ET
+#| padding: 0px
+
+plot_ndbc_hour_field(
+  salinity_fields[[4]],
+  value_col = "salinity",
+  legend_title = "Salinity (PSU)",
+  popup_suffix = " PSU",
+  palette = salinity_palette,
+  value_range = sal_range
+)
+```
+
+### Column {width=50%}
 
 ```{r sal-network-year}
 #| title: Network mean — full past year
@@ -202,11 +309,65 @@ plot_station_percentiles(
 
 ## Row {height=50%}
 
-::: {.card title="Network mean temperature"}
-`r format_network_context(temp_network_ctx, "°C")`
+### Column {width=50%} {.tabset}
 
-The **network mean** averages all valid buoy readings each day. The shaded band on the chart shows the across-buoy usual range for that calendar day (10th–90th percentile by day of year); the dashed line is the climatological median.
-:::
+```{r temp-field-06}
+#| title: 06:00 ET
+#| padding: 0px
+
+plot_ndbc_hour_field(
+  temperature_fields[[1]],
+  value_col = "temperature",
+  legend_title = "Temperature (°C)",
+  popup_suffix = " °C",
+  palette = temperature_palette,
+  value_range = temp_range
+)
+```
+
+```{r temp-field-12}
+#| title: 12:00 ET
+#| padding: 0px
+
+plot_ndbc_hour_field(
+  temperature_fields[[2]],
+  value_col = "temperature",
+  legend_title = "Temperature (°C)",
+  popup_suffix = " °C",
+  palette = temperature_palette,
+  value_range = temp_range
+)
+```
+
+```{r temp-field-18}
+#| title: 18:00 ET
+#| padding: 0px
+
+plot_ndbc_hour_field(
+  temperature_fields[[3]],
+  value_col = "temperature",
+  legend_title = "Temperature (°C)",
+  popup_suffix = " °C",
+  palette = temperature_palette,
+  value_range = temp_range
+)
+```
+
+```{r temp-field-24}
+#| title: 24:00 ET
+#| padding: 0px
+
+plot_ndbc_hour_field(
+  temperature_fields[[4]],
+  value_col = "temperature",
+  legend_title = "Temperature (°C)",
+  popup_suffix = " °C",
+  palette = temperature_palette,
+  value_range = temp_range
+)
+```
+
+### Column {width=50%}
 
 ```{r temp-network-year}
 #| title: Network mean — full past year
