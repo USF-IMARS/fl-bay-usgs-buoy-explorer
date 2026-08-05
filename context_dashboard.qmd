@@ -1,6 +1,6 @@
 ---
 title: "Current vs Usual"
-subtitle: "How do today's buoy conditions compare to the past year?"
+subtitle: "How do today's buoy conditions compare to the past five years?"
 author: "USGS / SECOORA ERDDAP"
 format:
   dashboard:
@@ -30,7 +30,8 @@ source("R/plot_ndbc_context.R")
 source("R/plot_ndbc_field.R")
 source("R/load_field_data.R")
 
-lookback_days <- 365
+lookback_years <- 5
+lookback_days <- lookback_years * 365
 
 history_raw <- fetch_ndbc_network_history(lookback_days = lookback_days)
 data_as_of <- fetch_ndbc_erddap_end_time()
@@ -55,8 +56,8 @@ temp_daily <- network_daily_means(temp_history, "temperature")
 sal_clim <- doy_climatology(sal_history, "salinity")
 temp_clim <- doy_climatology(temp_history, "temperature")
 
-sal_network_ctx <- network_daily_context(sal_daily, sal_clim, "salinity")
-temp_network_ctx <- network_daily_context(temp_daily, temp_clim, "temperature")
+sal_network_ctx <- network_daily_context(sal_daily, sal_clim, "salinity", lookback_years)
+temp_network_ctx <- network_daily_context(temp_daily, temp_clim, "temperature", lookback_years)
 
 sal_qc_label <- ndbc_qc_label("salinity")
 temp_qc_label <- ndbc_qc_label("temperature")
@@ -97,7 +98,7 @@ temp_range <- temp_field_range
 ```
 
 ::: {.content-visible when-format="dashboard"}
-**Usual** = each buoy's readings over the past **`r lookback_days` days**, compared by **day of year** (10th–90th percentile band). Data from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html). **Report:** `r report_time` · **Latest data:** `r data_as_of_label`
+**Usual** = each buoy's readings over the past **`r lookback_years` years**, compared by **day of year** (10th–90th percentile band). Data from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html). **Report:** `r report_time` · **Latest data:** `r data_as_of_label`
 :::
 
 # Overview
@@ -141,21 +142,21 @@ list(value = temp_counts$n_usual)
 ::: {.card title="Network mean salinity"}
 `r format_network_context(sal_network_ctx, "PSU")`
 
-The **network mean** averages all valid buoy readings each day. The shaded band on the full-year chart shows the across-buoy usual range for that calendar day (10th–90th percentile by day of year); the dashed line is the climatological median.
+The **network mean** averages all valid buoy readings each day. The chart overlays each calendar year on Jan–Dec (day of year): older years as thin black lines, the latest year in orange. The shaded band shows the across-buoy usual range for each day (10th–90th percentile across the past `r lookback_years` years); the dashed line is the climatological median.
 :::
 
 ::: {.card title="Network mean temperature"}
 `r format_network_context(temp_network_ctx, "°C")`
 
-The **network mean** averages all valid buoy readings each day. The shaded band on the full-year chart shows the across-buoy usual range for that calendar day (10th–90th percentile by day of year); the dashed line is the climatological median.
+The **network mean** averages all valid buoy readings each day. The chart overlays each calendar year on Jan–Dec (day of year): older years as thin black lines, the latest year in orange. The shaded band shows the across-buoy usual range for each day (10th–90th percentile across the past `r lookback_years` years); the dashed line is the climatological median.
 :::
 
 ## Row {height=40%}
 
 ::: {.card title="How to read this dashboard"}
-A buoy is **low** when its latest reading falls below the 10th percentile of its own past-year record; **high** when above the 90th percentile; **usual** otherwise. This is not a fixed salinity/temperature threshold — it adapts to each station's history and season.
+A buoy is **low** when its latest reading falls below the 10th percentile of its own past **`r lookback_years`-year** record; **high** when above the 90th percentile; **usual** otherwise. This is not a fixed salinity/temperature threshold — it adapts to each station's history and season.
 
-Distribution plots show the QC-filtered past-year record (all buoys pooled). Station bars show where today's reading ranks at each buoy (0 = lowest on record, 100 = highest). Interpolated maps show **DIVAnd** hourly fields on `r ref_date_label` for the variable on each page.
+Distribution plots show the QC-filtered **`r lookback_years`-year** record (all buoys pooled). Station bars show where today's reading ranks at each buoy (0 = lowest on record, 100 = highest). Interpolated maps show **DIVAnd** hourly fields on `r ref_date_label` for the variable on each page.
 
 Outliers and sentinel values are removed before analysis (salinity `r sal_qc_label` PSU; temperature `r temp_qc_label` °C).
 :::
@@ -165,7 +166,7 @@ Outliers and sentinel values are removed before analysis (salinity `r sal_qc_lab
 ## Row {height=55%}
 
 ```{r sal-distribution}
-#| title: Past-year salinity distribution
+#| title: Salinity distribution (past `r lookback_years` years)
 #| fig-width: 14
 #| fig-height: 5
 
@@ -177,7 +178,7 @@ plot_context_distribution(
   sal_history,
   sal_latest,
   value_col = "salinity",
-  title = "Salinity distribution (past year)",
+  title = sprintf("Salinity distribution (past %d years)", lookback_years),
   unit = "Salinity (PSU)"
 )
 ```
@@ -258,17 +259,16 @@ plot_ndbc_hour_field(
 ### Column {width=50%}
 
 ```{r sal-network-year}
-#| title: Network mean — full past year
+#| title: Network mean by year
 #| fig-width: 14
 #| fig-height: 4.5
 
-plot_context_timeseries(
+plot_network_mean_by_year(
   sal_daily,
   sal_clim,
-  value_col = "salinity",
-  title = "Full-year network salinity",
+  title = "Network mean salinity by year",
   unit = "Salinity (PSU)",
-  recent_days = NULL
+  lookback_years = lookback_years
 )
 ```
 
@@ -277,7 +277,7 @@ plot_context_timeseries(
 ## Row {height=55%}
 
 ```{r temp-distribution}
-#| title: Past-year temperature distribution
+#| title: Temperature distribution (past `r lookback_years` years)
 #| fig-width: 14
 #| fig-height: 5
 
@@ -289,7 +289,7 @@ plot_context_distribution(
   temp_history,
   temp_latest,
   value_col = "temperature",
-  title = "Temperature distribution (past year)",
+  title = sprintf("Temperature distribution (past %d years)", lookback_years),
   unit = "Temperature (°C)"
 )
 ```
@@ -370,16 +370,15 @@ plot_ndbc_hour_field(
 ### Column {width=50%}
 
 ```{r temp-network-year}
-#| title: Network mean — full past year
+#| title: Network mean by year
 #| fig-width: 14
 #| fig-height: 4.5
 
-plot_context_timeseries(
+plot_network_mean_by_year(
   temp_daily,
   temp_clim,
-  value_col = "temperature",
-  title = "Full-year network temperature",
+  title = "Network mean temperature by year",
   unit = "Temperature (°C)",
-  recent_days = NULL
+  lookback_years = lookback_years
 )
 ```

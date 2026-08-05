@@ -7,6 +7,25 @@ context_status_colors <- c(
   missing = "#999999"
 )
 
+network_year_style <- function(
+    year_labels,
+    latest_color = "#d94801",
+    old_color = "#1a1a1a",
+    old_linewidth = 0.3,
+    latest_linewidth = 1.5
+) {
+  n_years <- length(year_labels)
+  colors <- rep(old_color, n_years)
+  colors[n_years] <- latest_color
+  names(colors) <- year_labels
+
+  widths <- rep(old_linewidth, n_years)
+  widths[n_years] <- latest_linewidth
+  names(widths) <- year_labels
+
+  list(colors = colors, widths = widths)
+}
+
 plot_context_distribution <- function(
     history_df,
     latest_df,
@@ -118,9 +137,108 @@ plot_station_percentiles <- function(
     ggplot2::coord_flip() +
     ggplot2::labs(
       title = title,
-      subtitle = "Where the latest reading falls in each buoy's QC-filtered past-year distribution (0 = lowest, 100 = highest).",
+      subtitle = "Where the latest reading falls in each buoy's QC-filtered past record (0 = lowest, 100 = highest).",
       x = NULL,
       y = "Percentile rank"
+    ) +
+    ggplot2::theme_minimal(base_size = 11) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(face = "bold"),
+      panel.grid.minor = ggplot2::element_blank(),
+      legend.position = "bottom"
+    )
+}
+
+plot_network_mean_by_year <- function(
+    daily_df,
+    clim_df,
+    title,
+    unit,
+    lookback_years = 5,
+    subtitle = NULL
+) {
+  if (nrow(daily_df) == 0 || nrow(clim_df) == 0) {
+    return(NULL)
+  }
+
+  years <- sort(unique(daily_df$year))
+  n_years <- length(years)
+  year_labels <- as.character(years)
+
+  year_style <- network_year_style(year_labels)
+  year_colors <- year_style$colors
+  line_widths <- year_style$widths
+
+  month_breaks <- c(1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
+  month_labels <- c(
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  )
+
+  plot_df <- daily_df |>
+    dplyr::filter(.data$doy <= 365L) |>
+    dplyr::mutate(
+      year_label = factor(as.character(.data$year), levels = year_labels)
+    )
+
+  ribbon_df <- clim_df |>
+    dplyr::filter(.data$doy <= 365L) |>
+    dplyr::arrange(.data$doy)
+
+  if (is.null(subtitle)) {
+    subtitle <- sprintf(
+      paste0(
+        "Network mean daily %s by calendar year (past %d years), overlaid on day of year. ",
+        "Shaded band = usual range (10th–90th percentile by day of year); ",
+        "dashed = climatological median. Older years are thin black lines; the latest year is orange and thicker."
+      ),
+      tolower(gsub("\\(.*\\)", "", unit)),
+      lookback_years
+    )
+  }
+
+  ggplot2::ggplot(plot_df, ggplot2::aes(x = .data$doy, y = .data$value)) +
+    ggplot2::geom_ribbon(
+      data = ribbon_df,
+      ggplot2::aes(
+        x = .data$doy,
+        ymin = .data$p10,
+        ymax = .data$p90
+      ),
+      inherit.aes = FALSE,
+      fill = "#c6dbef",
+      alpha = 0.55
+    ) +
+    ggplot2::geom_line(
+      data = ribbon_df,
+      ggplot2::aes(x = .data$doy, y = .data$p50),
+      inherit.aes = FALSE,
+      color = "#636363",
+      linewidth = 0.5,
+      linetype = "dashed"
+    ) +
+    ggplot2::geom_line(
+      ggplot2::aes(
+        color = .data$year_label,
+        linewidth = .data$year_label,
+        group = .data$year_label
+      ),
+      alpha = 0.95,
+      lineend = "round"
+    ) +
+    ggplot2::scale_color_manual(values = year_colors, name = "Year") +
+    ggplot2::scale_linewidth_manual(values = line_widths, name = NULL, guide = "none") +
+    ggplot2::scale_x_continuous(
+      breaks = month_breaks,
+      labels = month_labels,
+      limits = c(1, 365),
+      expand = ggplot2::expansion(mult = c(0.01, 0.01))
+    ) +
+    ggplot2::labs(
+      title = title,
+      subtitle = subtitle,
+      x = NULL,
+      y = unit
     ) +
     ggplot2::theme_minimal(base_size = 11) +
     ggplot2::theme(
@@ -210,14 +328,15 @@ format_network_context <- function(ctx, unit, digits = 1) {
     return("Network mean unavailable.")
   }
 
-  pct_label <- if (is.na(ctx$year_percentile)) {
+  lookback_years <- if (is.null(ctx$lookback_years)) 5 else ctx$lookback_years
+  pct_label <- if (is.na(ctx$record_percentile)) {
     "n/a"
   } else {
-    sprintf("%.0f", ctx$year_percentile)
+    sprintf("%.0f", ctx$record_percentile)
   }
 
   sprintf(
-    "Latest network mean: **%.1f %s** on %s (%d buoys). Today's usual range: %.1f–%.1f %s (median %.1f). This sits at the **%sth percentile** of network daily means over the past year (year mean %.1f; range %.1f–%.1f).",
+    "Latest network mean: **%.1f %s** on %s (%d buoys). Today's usual range: %.1f–%.1f %s (median %.1f). This sits at the **%sth percentile** of network daily means over the past %d years (record mean %.1f; range %.1f–%.1f).",
     ctx$latest_value,
     unit,
     format(ctx$latest_date, "%Y-%m-%d"),
@@ -227,8 +346,9 @@ format_network_context <- function(ctx, unit, digits = 1) {
     unit,
     ctx$clim_p50,
     pct_label,
-    ctx$year_mean,
-    ctx$year_min,
-    ctx$year_max
+    lookback_years,
+    ctx$record_mean,
+    ctx$record_min,
+    ctx$record_max
   )
 }

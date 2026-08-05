@@ -73,7 +73,7 @@ prepare_ndbc_history <- function(df, value_col, tz = ndbc_display_tz) {
     )
 }
 
-network_daily_means <- function(df, value_col) {
+network_daily_means <- function(df, value_col, tz = ndbc_display_tz) {
   df |>
     dplyr::group_by(.data$station_id, .data$station, .data$date, .data$doy) |>
     dplyr::summarize(
@@ -85,6 +85,9 @@ network_daily_means <- function(df, value_col) {
       value = mean(.data$value, na.rm = TRUE),
       n_stations = dplyr::n(),
       .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      year = as.integer(format(.data$date, "%Y", tz = tz))
     )
 }
 
@@ -178,7 +181,7 @@ network_context_counts <- function(summary_df) {
   )
 }
 
-network_daily_context <- function(daily_df, clim_df, value_col) {
+network_daily_context <- function(daily_df, clim_df, value_col, lookback_years = 5) {
   if (nrow(daily_df) == 0) {
     return(list())
   }
@@ -189,7 +192,7 @@ network_daily_context <- function(daily_df, clim_df, value_col) {
   clim_today <- clim_df |>
     dplyr::filter(.data$doy == latest$doy)
 
-  year_pct <- if (nrow(daily_df) > 1) {
+  record_pct <- if (nrow(daily_df) > 1) {
     100 * stats::ecdf(daily_df$value)(latest$value)
   } else {
     NA_real_
@@ -202,10 +205,11 @@ network_daily_context <- function(daily_df, clim_df, value_col) {
     clim_p10 = if (nrow(clim_today) > 0) clim_today$p10[1] else NA_real_,
     clim_p50 = if (nrow(clim_today) > 0) clim_today$p50[1] else NA_real_,
     clim_p90 = if (nrow(clim_today) > 0) clim_today$p90[1] else NA_real_,
-    year_percentile = year_pct,
-    year_mean = mean(daily_df$value, na.rm = TRUE),
-    year_min = min(daily_df$value, na.rm = TRUE),
-    year_max = max(daily_df$value, na.rm = TRUE)
+    record_percentile = record_pct,
+    record_mean = mean(daily_df$value, na.rm = TRUE),
+    record_min = min(daily_df$value, na.rm = TRUE),
+    record_max = max(daily_df$value, na.rm = TRUE),
+    lookback_years = lookback_years
   )
 }
 
