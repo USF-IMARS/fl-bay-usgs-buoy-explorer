@@ -1,0 +1,608 @@
+---
+title: "Station Clustering"
+subtitle: "Grouping Florida Bay buoys by their salinity and temperature statistics"
+author: "USGS / SECOORA ERDDAP"
+format:
+  dashboard:
+    theme: cosmo
+    css: styles.css
+    nav-buttons:
+      - icon: github
+        href: https://github.com/usf-imars/fl-bay-usgs-buoy-explorer
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| output: false
+
+library(dplyr)
+library(ggplot2)
+library(leaflet)
+library(scales)
+
+source("R/fetch_ndbc_history.R")
+source("R/fetch_ndbc_observations.R")
+
+lookback_years <- 5
+lookback_days <- lookback_years * 365
+
+history_raw <- fetch_ndbc_network_history(lookback_days = lookback_days)
+
+sal_history <- prepare_ndbc_history(history_raw$salinity, "salinity")
+temp_history <- prepare_ndbc_history(history_raw$temperature, "temperature")
+
+report_time <- format(Sys.time(), "%Y-%m-%d %H:%M %Z", tz = ndbc_display_tz)
+```
+
+```{r compute-station-stats}
+station_stats <- function(df, value_col) {
+  if (is.null(df) || nrow(df) == 0) {
+    return(tibble())
+  }
+  df |>
+    group_by(station_id, station, latitude, longitude) |>
+    summarise(
+      mean   = mean(.data[[value_col]], na.rm = TRUE),
+      sd     = sd(.data[[value_col]], na.rm = TRUE),
+      min    = min(.data[[value_col]], na.rm = TRUE),
+      q25    = quantile(.data[[value_col]], 0.25, na.rm = TRUE),
+      median = median(.data[[value_col]], na.rm = TRUE),
+      q75    = quantile(.data[[value_col]], 0.75, na.rm = TRUE),
+      max    = max(.data[[value_col]], na.rm = TRUE),
+      iqr    = IQR(.data[[value_col]], na.rm = TRUE),
+      cv     = sd / mean,
+      n      = sum(!is.na(.data[[value_col]])),
+      .groups = "drop"
+    )
+}
+
+sal_stats <- station_stats(sal_history, "salinity")
+temp_stats <- station_stats(temp_history, "temperature")
+```
+
+```{r merge-and-cluster}
+# Merge salinity and temperature stats by station
+stats_df <- sal_stats |>
+  select(station_id, station, latitude, longitude,
+         sal_mean = mean, sal_sd = sd, sal_min = min, sal_q25 = q25,
+         sal_median = median, sal_q75 = q75, sal_max = max,
+         sal_iqr = iqr, sal_cv = cv, sal_n = n) |>
+  left_join(
+    temp_stats |>
+      select(station_id,
+             temp_mean = mean, temp_sd = sd, temp_min = min, temp_q25 = q25,
+             temp_median = median, temp_q75 = q75, temp_max = max,
+             temp_iqr = iqr, temp_cv = cv, temp_n = n),
+    by = "station_id"
+  ) |>
+  filter(!is.na(sal_mean), !is.na(temp_mean))
+
+# Feature matrix: central tendency + variability for each variable
+feature_cols <- c("sal_mean", "sal_sd", "sal_iqr", "sal_cv",
+                  "temp_mean", "temp_sd", "temp_iqr", "temp_cv")
+
+features <- stats_df |>
+  select(all_of(feature_cols)) |>
+  scale()
+
+rownames(features) <- stats_df$station_id
+
+# Hierarchical clustering (Ward's method on Euclidean distance)
+dist_mat <- dist(features, method = "euclidean")
+hc <- hclust(dist_mat, method = "ward.D2")
+
+# Fixed k = 4 clusters
+n_clusters <- 4
+
+# Silhouette widths for reference (k = 2..6)
+sil_widths <- sapply(2:6, function(k) {
+  sil <- cluster::silhouette(cutree(hc, k), dist_mat)
+  mean(sil[, "sil_width"])
+})
+
+clusters <- cutree(hc, k = n_clusters)
+stats_df$cluster <- factor(clusters[match(stats_df$station_id, rownames(features))])
+
+# PCA for visualization
+pca <- prcomp(features, center = TRUE, scale. = TRUE)
+pca_scores <- as.data.frame(pca$x)
+pca_scores$station_id <- rownames(features)
+pca_scores <- pca_scores |>
+  left_join(stats_df |> select(station_id, station, cluster), by = "station_id")
+
+pct_var <- 100 * pca$sdev^2 / sum(pca$sdev^2)
+
+cluster_colors <- c(
+  "1" = "#e41a1c", "2" = "#377eb8", "3" = "#4daf4a",
+  "4" = "#984ea3", "5" = "#ff7f00", "6" = "#a65628"
+)
+```
+
+# Overview
+
+## Row
+
+```{r}
+#| content: valuebox
+#| title: Stations clustered
+#| icon: diagram-3
+#| color: primary
+list(value = nrow(stats_df))
+```
+
+```{r}
+#| content: valuebox
+#| title: Clusters
+#| icon: layers
+#| color: info
+list(value = n_clusters)
+```
+
+```{r}
+#| content: valuebox
+#| title: Lookback period
+#| icon: calendar3
+#| color: secondary
+list(value = sprintf("%d years", lookback_years))
+```
+
+```{r}
+#| content: valuebox
+#| title: Silhouette width at k = 4
+#| icon: trophy
+#| color: success
+list(value = sprintf("%.3f", sil_widths[n_clusters - 1]))
+```
+
+## Row
+
+::: {.card title="About this dashboard"}
+Stations are grouped by **hierarchical clustering** (Ward's method, *k* = `r n_clusters`) on standardized summary statistics computed from the past **`r lookback_years` years** of QC-filtered salinity and temperature observations.
+
+The feature set includes the **mean, standard deviation, interquartile range, and coefficient of variation** for each variable. Silhouette widths for *k* = 2–6 are shown for reference.
+
+Outliers and sentinel values are removed before computing statistics (salinity `r ndbc_qc_label("salinity")` PSU; temperature `r ndbc_qc_label("temperature")` °C).
+
+**Report:** `r report_time`
+:::
+
+# Cluster Map
+
+## Row {height=90%}
+
+```{r cluster-map}
+#| title: Stations colored by cluster
+#| fig-width: 10
+#| fig-height: 7
+
+pal_cluster <- colorFactor(
+  palette = cluster_colors,
+  domain = levels(stats_df$cluster)
+)
+
+leaflet(stats_df) |>
+  addProviderTiles("CartoDB.Positron") |>
+  setView(
+    lng = mean(stats_df$longitude),
+    lat = mean(stats_df$latitude),
+    zoom = 9
+  ) |>
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 10,
+    stroke = TRUE,
+    weight = 2,
+    color = "#333333",
+    fillColor = ~pal_cluster(cluster),
+    fillOpacity = 0.85,
+    label = ~sprintf("%s (Cluster %s)", station, cluster)
+  ) |>
+  addLegend(
+    position = "bottomright",
+    pal = pal_cluster,
+    values = stats_df$cluster,
+    title = "Cluster",
+    opacity = 0.9
+  )
+```
+
+# Dendrogram & PCA
+
+## Row {height=50%}
+
+```{r dendrogram}
+#| title: Hierarchical clustering dendrogram
+#| fig-width: 10
+#| fig-height: 5
+
+# Extract dendrogram data from hclust object without ggdendro
+dendro_segments <- function(hc) {
+  n <- length(hc$order)
+  merg <- hc$merge
+  ht   <- hc$height
+  ord  <- hc$order
+
+  x_pos <- numeric(2 * n - 1)
+  x_pos[1:n] <- match(1:n, ord)
+
+  segs <- vector("list", n - 1)
+  for (i in seq_len(n - 1)) {
+    left  <- merg[i, 1]
+    right <- merg[i, 2]
+    x_left  <- if (left < 0)  match(-left, ord)  else x_pos[n + left]
+    x_right <- if (right < 0) match(-right, ord) else x_pos[n + right]
+    x_mid <- (x_left + x_right) / 2
+    x_pos[n + i] <- x_mid
+    # Three segments per merge: left-up, across, right-down
+    segs[[i]] <- data.frame(
+      x    = c(x_left,  x_left, x_right),
+      y    = c(0,       ht[i],  ht[i]),
+      xend = c(x_left,  x_right, x_right),
+      yend = c(ht[i],   ht[i],  0)
+    )
+  }
+  do.call(rbind, segs)
+}
+
+segs <- dendro_segments(hc)
+
+label_df <- data.frame(
+  x = match(seq_along(hc$labels), hc$order),
+  y = 0,
+  label = stats_df$station[match(hc$labels, stats_df$station_id)],
+  cluster = factor(clusters[hc$labels])
+)
+
+ggplot() +
+  geom_segment(
+    data = segs,
+    aes(x = x, y = y, xend = xend, yend = yend),
+    color = "#555555",
+    linewidth = 0.5
+  ) +
+  geom_point(
+    data = label_df,
+    aes(x = x, y = y, color = cluster),
+    size = 3
+  ) +
+  geom_text(
+    data = label_df,
+    aes(x = x, y = y - 0.4, label = label, color = cluster),
+    angle = 45, hjust = 1, size = 3, show.legend = FALSE
+  ) +
+  geom_hline(
+    yintercept = hc$height[length(hc$height) - n_clusters + 1],
+    linetype = "dashed", color = "#999999"
+  ) +
+  scale_color_manual(values = cluster_colors, name = "Cluster") +
+  scale_y_continuous(expand = expansion(mult = c(0.15, 0.05))) +
+  coord_flip() +
+  labs(
+    title = "Ward's hierarchical clustering dendrogram",
+    subtitle = sprintf("Dashed line cuts at k = %d. Feature set: salinity and temperature mean, SD, IQR, and CV.", n_clusters),
+    x = NULL,
+    y = "Height"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom"
+  )
+```
+
+## Row {height=50%}
+
+```{r pca-biplot}
+#| title: PCA biplot
+#| fig-width: 10
+#| fig-height: 6
+
+loadings <- as.data.frame(pca$rotation[, 1:2])
+loadings$feature <- rownames(loadings)
+
+ggplot(pca_scores, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = cluster), size = 4, alpha = 0.85) +
+  geom_text(
+    aes(label = station),
+    size = 2.8, hjust = -0.15, vjust = 0.5, check_overlap = TRUE
+  ) +
+  geom_segment(
+    data = loadings,
+    aes(x = 0, y = 0, xend = PC1 * 2.5, yend = PC2 * 2.5),
+    arrow = arrow(length = unit(0.2, "cm")),
+    color = "#333333",
+    linewidth = 0.6,
+    inherit.aes = FALSE
+  ) +
+  geom_text(
+    data = loadings,
+    aes(x = PC1 * 2.7, y = PC2 * 2.7, label = feature),
+    size = 3, color = "#333333", inherit.aes = FALSE
+  ) +
+  scale_color_manual(values = cluster_colors, name = "Cluster") +
+  labs(
+    title = "PCA of station statistics",
+    subtitle = sprintf("PC1 (%.1f%% variance) vs PC2 (%.1f%% variance). Arrows show feature loadings.", pct_var[1], pct_var[2]),
+    x = sprintf("PC1 (%.1f%%)", pct_var[1]),
+    y = sprintf("PC2 (%.1f%%)", pct_var[2])
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom"
+  )
+```
+
+# Cluster Time Series
+
+## Row {height=55%}
+
+```{r sal-ts-by-cluster}
+#| title: Salinity time series by cluster
+#| fig-width: 12
+#| fig-height: 6
+
+sal_daily_station <- sal_history |>
+  inner_join(stats_df |> select(station_id, cluster), by = "station_id") |>
+  mutate(date = as.Date(time, tz = ndbc_display_tz)) |>
+  group_by(cluster, station_id, station, date) |>
+  summarise(salinity = mean(salinity, na.rm = TRUE), .groups = "drop")
+
+sal_cluster_daily <- sal_daily_station |>
+  group_by(cluster, date) |>
+  summarise(
+    mean_sal = mean(salinity, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+ggplot() +
+  geom_line(
+    data = sal_daily_station,
+    aes(x = date, y = salinity, group = station_id),
+    color = "#aaaaaa", linewidth = 0.25, alpha = 0.5
+  ) +
+  geom_line(
+    data = sal_cluster_daily,
+    aes(x = date, y = mean_sal, color = cluster),
+    linewidth = 1.1
+  ) +
+  scale_color_manual(values = cluster_colors, name = "Cluster") +
+  facet_wrap(~ cluster, ncol = 1, scales = "free_y") +
+  labs(
+    title = "Daily mean salinity by cluster",
+    subtitle = sprintf("Thin gray lines = individual stations; colored line = cluster mean. Past %d years of QC-filtered data.", lookback_years),
+    x = NULL,
+    y = "Salinity (PSU)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+## Row {height=45%}
+
+```{r temp-ts-by-cluster}
+#| title: Temperature time series by cluster
+#| fig-width: 12
+#| fig-height: 6
+
+temp_daily_station <- temp_history |>
+  inner_join(stats_df |> select(station_id, cluster), by = "station_id") |>
+  mutate(date = as.Date(time, tz = ndbc_display_tz)) |>
+  group_by(cluster, station_id, station, date) |>
+  summarise(temperature = mean(temperature, na.rm = TRUE), .groups = "drop")
+
+temp_cluster_daily <- temp_daily_station |>
+  group_by(cluster, date) |>
+  summarise(
+    mean_temp = mean(temperature, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+ggplot() +
+  geom_line(
+    data = temp_daily_station,
+    aes(x = date, y = temperature, group = station_id),
+    color = "#aaaaaa", linewidth = 0.25, alpha = 0.5
+  ) +
+  geom_line(
+    data = temp_cluster_daily,
+    aes(x = date, y = mean_temp, color = cluster),
+    linewidth = 1.1
+  ) +
+  scale_color_manual(values = cluster_colors, name = "Cluster") +
+  facet_wrap(~ cluster, ncol = 1, scales = "free_y") +
+  labs(
+    title = "Daily mean temperature by cluster",
+    subtitle = sprintf("Thin gray lines = individual stations; colored line = cluster mean. Past %d years of QC-filtered data.", lookback_years),
+    x = NULL,
+    y = "Temperature (\u00b0C)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+# Cluster Profiles
+
+## Row {height=50%}
+
+```{r salinity-profile}
+#| title: Salinity distribution by cluster
+#| fig-width: 10
+#| fig-height: 5
+
+sal_long <- sal_history |>
+  inner_join(stats_df |> select(station_id, cluster), by = "station_id")
+
+ggplot(sal_long, aes(x = cluster, y = salinity, fill = cluster)) +
+  geom_boxplot(outlier.size = 0.4, outlier.alpha = 0.3, linewidth = 0.5) +
+  scale_fill_manual(values = cluster_colors, name = "Cluster") +
+  labs(
+    title = "Salinity distribution by cluster",
+    subtitle = sprintf("QC-filtered hourly observations from the past %d years, grouped by cluster assignment.", lookback_years),
+    x = "Cluster",
+    y = "Salinity (PSU)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
+  )
+```
+
+```{r temperature-profile}
+#| title: Temperature distribution by cluster
+#| fig-width: 10
+#| fig-height: 5
+
+temp_long <- temp_history |>
+  inner_join(stats_df |> select(station_id, cluster), by = "station_id")
+
+ggplot(temp_long, aes(x = cluster, y = temperature, fill = cluster)) +
+  geom_boxplot(outlier.size = 0.4, outlier.alpha = 0.3, linewidth = 0.5) +
+  scale_fill_manual(values = cluster_colors, name = "Cluster") +
+  labs(
+    title = "Temperature distribution by cluster",
+    subtitle = sprintf("QC-filtered hourly observations from the past %d years, grouped by cluster assignment.", lookback_years),
+    x = "Cluster",
+    y = "Temperature (°C)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
+  )
+```
+
+## Row {height=50%}
+
+```{r silhouettes}
+#| title: Silhouette analysis
+#| fig-width: 10
+#| fig-height: 5
+
+sil_df <- data.frame(
+  k = 2:6,
+  sil_width = sil_widths
+)
+
+ggplot(sil_df, aes(x = k, y = sil_width)) +
+  geom_line(color = "#555555", linewidth = 0.6) +
+  geom_point(size = 3) +
+  geom_point(
+    data = sil_df |> filter(k == n_clusters),
+    color = "#e41a1c", size = 5, shape = 21, stroke = 2
+  ) +
+  scale_x_continuous(breaks = 2:6) +
+  labs(
+    title = "Average silhouette width by number of clusters",
+    subtitle = sprintf("Selected k = %d (highlighted in red). Higher values indicate better-separated clusters.", n_clusters),
+    x = "Number of clusters (k)",
+    y = "Average silhouette width"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+```
+
+```{r cluster-means-heatmap}
+#| title: Cluster mean profiles
+#| fig-width: 10
+#| fig-height: 5
+
+profile_df <- stats_df |>
+  group_by(cluster) |>
+  summarise(
+    `Salinity mean`   = mean(sal_mean, na.rm = TRUE),
+    `Salinity SD`     = mean(sal_sd, na.rm = TRUE),
+    `Salinity IQR`    = mean(sal_iqr, na.rm = TRUE),
+    `Salinity CV`     = mean(sal_cv, na.rm = TRUE),
+    `Temperature mean` = mean(temp_mean, na.rm = TRUE),
+    `Temperature SD`   = mean(temp_sd, na.rm = TRUE),
+    `Temperature IQR`  = mean(temp_iqr, na.rm = TRUE),
+    `Temperature CV`   = mean(temp_cv, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  tidyr::pivot_longer(-cluster, names_to = "feature", values_to = "value")
+
+profile_df |>
+  mutate(
+    cluster = factor(cluster),
+    feature = factor(feature, levels = rev(c(
+      "Salinity mean", "Salinity SD", "Salinity IQR", "Salinity CV",
+      "Temperature mean", "Temperature SD", "Temperature IQR", "Temperature CV"
+    )))
+  ) |>
+  ggplot(aes(x = cluster, y = feature, fill = value)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = sprintf("%.2f", value)), size = 3) +
+  scale_fill_viridis_c(option = "C", name = "Value") +
+  labs(
+    title = "Cluster mean feature profiles",
+    subtitle = "Average of standardized station statistics within each cluster.",
+    x = "Cluster",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid = element_blank()
+  )
+```
+
+# Station Table {scrolling="true"}
+
+## Row
+
+```{r station-table}
+#| title: Station statistics and cluster assignments
+
+stats_df |>
+  arrange(cluster, station) |>
+  mutate(
+    cluster = as.integer(cluster),
+    sal_cv  = number(sal_cv, accuracy = 0.01),
+    temp_cv = number(temp_cv, accuracy = 0.01)
+  ) |>
+  select(
+    Cluster = cluster,
+    Station = station,
+    `Sal mean` = sal_mean,
+    `Sal SD` = sal_sd,
+    `Sal IQR` = sal_iqr,
+    `Sal CV` = sal_cv,
+    `Temp mean` = temp_mean,
+    `Temp SD` = temp_sd,
+    `Temp IQR` = temp_iqr,
+    `Temp CV` = temp_cv
+  ) |>
+  DT::datatable(
+    rownames = FALSE,
+    options = list(dom = "ft", pageLength = 25),
+    selection = "none"
+  ) |>
+  DT::formatRound(columns = c(3:5, 7:9), digits = 1)
+```

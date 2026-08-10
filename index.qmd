@@ -15,6 +15,7 @@ This site hosts static [Quarto dashboards](https://quarto.org/docs/dashboards/) 
 - [**Current vs Usual →**](context_dashboard.html) — compare today's readings to each buoy's past-year distribution and seasonal range
 - [**Salinity & Temperature Maps →**](maps_dashboard.html) — paired salinity and temperature maps side by side, with hourly interpolated fields
 - [**Salinity Dashboard →**](dashboard.html) — salinity overview, interpolated fields, and station gauges
+- [**Station Clustering →**](cluster_dashboard.html) — hierarchical clustering of buoys by salinity and temperature statistics
 
 The dashboards reuse interpolation and mapping methods from the [south-florida-salinity](https://github.com/usf-imars/south-florida-salinity) project:
 
