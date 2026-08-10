@@ -4,14 +4,14 @@
     "href": "index.html",
     "title": "Florida Bay Buoy Explorer",
     "section": "",
-    "text": "This site hosts a static Quarto dashboard for exploring Everglades National Park buoy salinity data from SECOORA ERDDAP.\nThe dashboard reuses interpolation and mapping methods from the south-florida-salinity project:"
+    "text": "This site hosts static Quarto dashboards for exploring Everglades National Park buoy data from SECOORA ERDDAP."
   },
   {
-    "objectID": "index.html#open-the-dashboard",
-    "href": "index.html#open-the-dashboard",
+    "objectID": "index.html#dashboards",
+    "href": "index.html#dashboards",
     "title": "Florida Bay Buoy Explorer",
-    "section": "Open the dashboard",
-    "text": "Open the dashboard\nLaunch dashboard →"
+    "section": "Dashboards",
+    "text": "Dashboards\n\nCurrent vs Usual → — compare today’s readings to each buoy’s past-year distribution and seasonal range\nSalinity & Temperature Maps → — paired salinity and temperature maps side by side, with hourly interpolated fields\nSalinity Dashboard → — salinity overview, interpolated fields, and station gauges\nStation Clustering → — hierarchical clustering of buoys by salinity and temperature statistics\n\nThe dashboards reuse interpolation and mapping methods from the south-florida-salinity project:\n\nLeaflet htmlwidgets for interactive buoy maps (Quarto htmlwidgets)\nDIVAnd variational analysis with bathymetry-aware land masking\nHourly field panels at 06:00, 12:00, 18:00, and 24:00 US Eastern"
   },
   {
     "objectID": "index.html#build-locally",

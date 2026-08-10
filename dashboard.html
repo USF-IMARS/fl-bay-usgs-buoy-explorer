@@ -129,7 +129,19 @@ ul.task-list li input[type="checkbox"] {
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./dashboard.html" aria-current="page"> 
-<span class="menu-text">Dashboard</span></a>
+<span class="menu-text">Salinity Dashboard</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./maps_dashboard.html"> 
+<span class="menu-text">Salinity &amp; Temperature Maps</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./context_dashboard.html"> 
+<span class="menu-text">Current vs Usual</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./cluster_dashboard.html"> 
+<span class="menu-text">Station Clustering</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
@@ -394,7 +406,7 @@ High salinity
 </div>
 <div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 1fr);
 grid-auto-rows: minmax(0, 1fr);">
-<div class="card html-fill-item html-fill-container bslib-card" data-title="Station gauges" data-fill="false" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card html-fill-item html-fill-container bslib-card" data-fill="false" data-title="Station gauges" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
 <div class="card-header"><div class="card-title"><span style="display: inline">
 Station gauges
 </span></div></div>
@@ -902,7 +914,7 @@ High: &gt; 35 PSU
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/USF-IMARS\.github\.io\/fl-bay-usgs-buoy-explorer\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

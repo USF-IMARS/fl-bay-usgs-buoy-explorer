@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://USF-IMARS.github.io/fl-bay-usgs-buoy-explorer/dashboard.html</loc>
+    <lastmod>2026-07-28T17:38:15.576Z</lastmod>
+  </url>
+  <url>
+    <loc>https://USF-IMARS.github.io/fl-bay-usgs-buoy-explorer/context_dashboard.html</loc>
+    <lastmod>2026-08-05T20:35:05.064Z</lastmod>
+  </url>
+  <url>
+    <loc>https://USF-IMARS.github.io/fl-bay-usgs-buoy-explorer/cluster_dashboard.html</loc>
+    <lastmod>2026-08-10T16:29:05.239Z</lastmod>
+  </url>
+  <url>
+    <loc>https://USF-IMARS.github.io/fl-bay-usgs-buoy-explorer/index.html</loc>
+    <lastmod>2026-08-07T16:35:20.078Z</lastmod>
+  </url>
+  <url>
+    <loc>https://USF-IMARS.github.io/fl-bay-usgs-buoy-explorer/maps_dashboard.html</loc>
+    <lastmod>2026-07-31T18:05:07.005Z</lastmod>
+  </url>
+</urlset>
