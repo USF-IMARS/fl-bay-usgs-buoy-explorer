@@ -213,8 +213,8 @@ plot_network_mean_by_year <- function(
       data = ribbon_df,
       ggplot2::aes(x = .data$doy, y = .data$p50),
       inherit.aes = FALSE,
-      color = "#636363",
-      linewidth = 0.5,
+      color = "#252525",
+      linewidth = 1,
       linetype = "dashed"
     ) +
     ggplot2::geom_line(

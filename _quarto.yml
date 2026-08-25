@@ -10,12 +10,12 @@ website:
         text: Home
       - href: maps_dashboard.qmd
         text: Latest Salinity & Temperature
+      - href: context_dashboard.qmd
+        text: Current vs Usual
       - text: Other Analyses
         menu:
           - href: dashboard.qmd
             text: Salinity Dashboard
-          - href: context_dashboard.qmd
-            text: Current vs Usual
           - href: cluster_dashboard.qmd
             text: Station Clustering
     right:

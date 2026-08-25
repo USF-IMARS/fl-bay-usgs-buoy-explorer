@@ -44,12 +44,6 @@ temp_history <- prepare_ndbc_history(history_raw$temperature, "temperature")
 sal_latest <- latest_ndbc_readings(sal_history, "salinity")
 temp_latest <- latest_ndbc_readings(temp_history, "temperature")
 
-sal_summary <- station_context_summary(sal_history, sal_latest, "salinity")
-temp_summary <- station_context_summary(temp_history, temp_latest, "temperature")
-
-sal_counts <- network_context_counts(sal_summary)
-temp_counts <- network_context_counts(temp_summary)
-
 sal_daily <- network_daily_means(sal_history, "salinity")
 temp_daily <- network_daily_means(temp_history, "temperature")
 
@@ -98,65 +92,27 @@ temp_range <- temp_field_range
 ```
 
 ::: {.content-visible when-format="dashboard"}
-**Usual** = each buoy's readings over the past **`r lookback_years` years**, compared by **day of year** (10th–90th percentile band). Data from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html). **Report:** `r report_time` · **Latest data:** `r data_as_of_label`
+**Usual** = the 10th–90th percentile of the past **`r lookback_years` years** of readings. Data from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html). **Report:** `r report_time` · **Latest data:** `r data_as_of_label`
 :::
 
 # Overview
-
-## Row
-
-```{r}
-#| content: valuebox
-#| title: High salinity buoys
-#| icon: arrow-up-circle
-#| color: warning
-list(value = sal_counts$n_high)
-```
-
-```{r}
-#| content: valuebox
-#| title: Usual salinity buoys
-#| icon: check-circle
-#| color: success
-list(value = sal_counts$n_usual)
-```
-
-```{r}
-#| content: valuebox
-#| title: High temperature buoys
-#| icon: thermometer-high
-#| color: danger
-list(value = temp_counts$n_high)
-```
-
-```{r}
-#| content: valuebox
-#| title: Usual temperature buoys
-#| icon: thermometer-half
-#| color: info
-list(value = temp_counts$n_usual)
-```
 
 ## Row {height=35%}
 
 ::: {.card title="Network mean salinity"}
 `r format_network_context(sal_network_ctx, "PSU")`
-
-The **network mean** averages all valid buoy readings each day. The chart overlays each calendar year on Jan–Dec (day of year): older years as thin black lines, the latest year in orange. The shaded band shows the across-buoy usual range for each day (10th–90th percentile across the past `r lookback_years` years); the dashed line is the climatological median.
 :::
 
 ::: {.card title="Network mean temperature"}
 `r format_network_context(temp_network_ctx, "°C")`
-
-The **network mean** averages all valid buoy readings each day. The chart overlays each calendar year on Jan–Dec (day of year): older years as thin black lines, the latest year in orange. The shaded band shows the across-buoy usual range for each day (10th–90th percentile across the past `r lookback_years` years); the dashed line is the climatological median.
 :::
 
 ## Row {height=40%}
 
 ::: {.card title="How to read this dashboard"}
-A buoy is **low** when its latest reading falls below the 10th percentile of its own past **`r lookback_years`-year** record; **high** when above the 90th percentile; **usual** otherwise. This is not a fixed salinity/temperature threshold — it adapts to each station's history and season.
+Distribution plots show the QC-filtered **`r lookback_years`-year** record (all buoys pooled), with each buoy's latest reading marked against that history. Interpolated maps show **DIVAnd** hourly fields on `r ref_date_label` for the variable on each page.
 
-Distribution plots show the QC-filtered **`r lookback_years`-year** record (all buoys pooled). Station bars show where today's reading ranks at each buoy (0 = lowest on record, 100 = highest). Interpolated maps show **DIVAnd** hourly fields on `r ref_date_label` for the variable on each page.
+Click the **Salinity** or **Temperature** tabs in the top right to see the distribution, interpolated maps, and yearly trend for each variable.
 
 Outliers and sentinel values are removed before analysis (salinity `r sal_qc_label` PSU; temperature `r temp_qc_label` °C).
 :::
@@ -183,18 +139,11 @@ plot_context_distribution(
 )
 ```
 
-```{r sal-percentiles}
-#| title: Latest salinity percentile by buoy
-#| fig-width: 14
-#| fig-height: 5
+::: {.card title="How to interpret these charts"}
+The **distribution** (left) is the QC-filtered salinity record for all buoys over the past `r lookback_years` years. The gray dashed lines mark the 10th, 50th, and 90th percentiles of that history. The orange lines mark each buoy's latest reading: the closer a line sits to either edge of the histogram, the more unusual that buoy's current salinity is for this time of year.
 
-plot_station_percentiles(
-  sal_summary,
-  value_col = "salinity",
-  title = "Where today falls in each buoy's history",
-  unit = "Salinity (PSU)"
-)
-```
+Below, the interpolated maps show how salinity varies across the bay at four times on `r ref_date_label`, and **Network mean by year** compares this year's daily average (orange) against every prior year (thin black lines) and the climatological median band.
+:::
 
 ## Row {height=50%}
 
@@ -294,18 +243,11 @@ plot_context_distribution(
 )
 ```
 
-```{r temp-percentiles}
-#| title: Latest temperature percentile by buoy
-#| fig-width: 14
-#| fig-height: 5
+::: {.card title="How to interpret these charts"}
+The **distribution** (left) is the QC-filtered temperature record for all buoys over the past `r lookback_years` years. The gray dashed lines mark the 10th, 50th, and 90th percentiles of that history. The orange lines mark each buoy's latest reading: the closer a line sits to either edge of the histogram, the more unusual that buoy's current temperature is for this time of year.
 
-plot_station_percentiles(
-  temp_summary,
-  value_col = "temperature",
-  title = "Where today falls in each buoy's history",
-  unit = "Temperature (°C)"
-)
-```
+Below, the interpolated maps show how temperature varies across the bay at four times on `r ref_date_label`, and **Network mean by year** compares this year's daily average (orange) against every prior year (thin black lines) and the climatological median band.
+:::
 
 ## Row {height=50%}
 
