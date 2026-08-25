@@ -20,7 +20,6 @@ execute:
 
 library(dplyr)
 library(htmltools)
-library(leaflet)
 library(scales)
 
 source("R/fetch_ndbc_observations.R")
@@ -35,9 +34,6 @@ temp_ndbc <- fetch_ndbc_hourly_snapshots(
   param = "sea_water_temperature",
   value_col = "temperature"
 )
-
-salinity_data <- sal_ndbc$latest |> filter(!is.na(salinity))
-temperature_data <- temp_ndbc$latest |> filter(!is.na(temperature))
 
 ref_date_label <- format(sal_ndbc$reference_date, "%Y-%m-%d")
 data_as_of_label <- format_ndbc_time(sal_ndbc$data_as_of)
@@ -63,124 +59,12 @@ temperature_palette <- c(
 
 sal_range <- field_value_range(salinity_fields, "salinity")
 temp_range <- field_value_range(temperature_fields, "temperature")
-mean_salinity <- mean(salinity_data$salinity, na.rm = TRUE)
-mean_temperature <- mean(temperature_data$temperature, na.rm = TRUE)
 ```
 
 ::: {.content-visible when-format="dashboard"}
 Paired **salinity** and **temperature** maps from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html) buoys, interpolated with **DIVAnd** and bathymetry masking.
 **Report:** `r report_time` · **Latest data:** `r data_as_of_label` · **Reference day:** `r ref_date_label`
 :::
-
-# Latest Readings
-
-## Row
-
-```{r}
-#| content: valuebox
-#| title: Mean salinity
-#| icon: droplet-half
-#| color: info
-list(value = sprintf("%.1f PSU", mean_salinity))
-```
-
-```{r}
-#| content: valuebox
-#| title: Mean temperature
-#| icon: thermometer-half
-#| color: warning
-list(value = sprintf("%.1f °C", mean_temperature))
-```
-
-```{r}
-#| content: valuebox
-#| title: Reference day
-#| icon: calendar3
-#| color: secondary
-list(value = ref_date_label)
-```
-
-## Row {height=70%}
-
-```{r latest-salinity-map}
-#| title: Latest salinity
-#| padding: 0px
-
-if (nrow(salinity_data) == 0) {
-  stop("No salinity data returned from ERDDAP.")
-}
-
-sal_pal <- colorNumeric(salinity_palette, salinity_data$salinity, na.color = "#999999")
-
-leaflet(salinity_data) |>
-  addProviderTiles("CartoDB.Positron") |>
-  setView(
-    lng = mean(salinity_data$longitude),
-    lat = mean(salinity_data$latitude),
-    zoom = 9
-  ) |>
-  addCircleMarkers(
-    lng = ~longitude,
-    lat = ~latitude,
-    radius = 8,
-    stroke = TRUE,
-    weight = 1,
-    color = "#333333",
-    fillColor = ~sal_pal(salinity),
-    fillOpacity = 0.85,
-    label = ~sprintf("%s: %.1f PSU\n%s", location, salinity, format_ndbc_time(time))
-  ) |>
-  addLegend(
-    position = "bottomright",
-    pal = sal_pal,
-    values = salinity_data$salinity,
-    title = "Salinity (PSU)",
-    opacity = 0.9
-  )
-```
-
-```{r latest-temperature-map}
-#| title: Latest temperature
-#| padding: 0px
-
-if (nrow(temperature_data) == 0) {
-  stop("No temperature data returned from ERDDAP.")
-}
-
-temp_pal <- colorNumeric(
-  temperature_palette,
-  temperature_data$temperature,
-  na.color = "#999999"
-)
-
-leaflet(temperature_data) |>
-  addProviderTiles("CartoDB.Positron") |>
-  setView(
-    lng = mean(temperature_data$longitude),
-    lat = mean(temperature_data$latitude),
-    zoom = 9
-  ) |>
-  addCircleMarkers(
-    lng = ~longitude,
-    lat = ~latitude,
-    radius = 8,
-    stroke = TRUE,
-    weight = 1,
-    color = "#333333",
-    fillColor = ~temp_pal(temperature),
-    fillOpacity = 0.85,
-    label = ~sprintf("%s: %.1f °C\n%s", location, temperature, format_ndbc_time(time))
-  ) |>
-  addLegend(
-    position = "bottomright",
-    pal = temp_pal,
-    values = temperature_data$temperature,
-    title = "Temperature (°C)",
-    opacity = 0.9
-  )
-```
-
-# Interpolated Maps {scrolling="true"}
 
 ## Row {.flow}
 

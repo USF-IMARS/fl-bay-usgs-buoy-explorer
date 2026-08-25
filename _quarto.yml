@@ -8,12 +8,12 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: maps_dashboard.qmd
+        text: Latest Salinity & Temperature
       - text: Other Analyses
         menu:
           - href: dashboard.qmd
             text: Salinity Dashboard
-          - href: maps_dashboard.qmd
-            text: Salinity & Temperature Maps
           - href: context_dashboard.qmd
             text: Current vs Usual
           - href: cluster_dashboard.qmd
