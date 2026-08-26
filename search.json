@@ -1,5 +1,124 @@
 [
   {
+    "objectID": "historical_highlights/batched_reports/WS23011.html",
+    "href": "historical_highlights/batched_reports/WS23011.html",
+    "title": "WS23011",
+    "section": "",
+    "text": "Cruise WS23011 surveyed 13 checkpoint stations in the Lower Keys, Middle Keys, Upper Keys during 2023-01-04 to 2023-01-17. The interpolated fields below approximate conditions on 2023-01-10 12:00 EST — the midpoint of the cruise’s model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise’s model window shaded."
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS23011.html#checkpoint-stations-nearest-buoys",
+    "href": "historical_highlights/batched_reports/WS23011.html#checkpoint-stations-nearest-buoys",
+    "title": "WS23011",
+    "section": "Checkpoint stations & nearest buoys",
+    "text": "Checkpoint stations & nearest buoys\n\n\n\n\n\n\n\n\n\n\n\nStation\nRegion\nNearest buoy\nDistance (km)\n\n\n\n\n21LK\nLower Keys\nJohnson_Key\n77.3\n\n\nKW1\nLower Keys\nMurray_Key\n109.3\n\n\nKW2\nLower Keys\nMurray_Key\n106.9\n\n\nWS\nLower Keys\nJohnson_Key\n104.3\n\n\n10\nMiddle Keys\nPeterson_Key\n18.5\n\n\n12\nMiddle Keys\nPeterson_Key\n24.3\n\n\n16\nMiddle Keys\nLittle_Rabbit_Key\n51.4\n\n\n18\nMiddle Keys\nLittle_Rabbit_Key\n56.0\n\n\n7\nMiddle Keys\nPeterson_Key\n11.5\n\n\n9\nMiddle Keys\nPeterson_Key\n17.1\n\n\n9.5\nMiddle Keys\nPeterson_Key\n22.9\n\n\n2\nUpper Keys\nMiddle_Key\n49.0\n\n\nMR\nUpper Keys\nButternut_Kay\n17.4"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS23011.html#interpolated-fields",
+    "href": "historical_highlights/batched_reports/WS23011.html#interpolated-fields",
+    "title": "WS23011",
+    "section": "Interpolated fields",
+    "text": "Interpolated fields\n\nSalinityTemperature"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS23011.html#nearest-buoy-time-series",
+    "href": "historical_highlights/batched_reports/WS23011.html#nearest-buoy-time-series",
+    "title": "WS23011",
+    "section": "Nearest-buoy time series",
+    "text": "Nearest-buoy time series\n\nButternut_Kay\nNearest buoy for checkpoint station(s): MR\n\n\n\nJohnson_Key\nNearest buoy for checkpoint station(s): 21LK, WS\nNo salinity data available for this buoy during the cruise window.\n\n\n\nLittle_Rabbit_Key\nNearest buoy for checkpoint station(s): 16, 18\nNo temperature data available for this buoy during the cruise window.\n\n\nMiddle_Key\nNearest buoy for checkpoint station(s): 2\n\n\n\nMurray_Key\nNearest buoy for checkpoint station(s): KW1, KW2\n\n\n\nPeterson_Key\nNearest buoy for checkpoint station(s): 10, 12, 7, 9, 9.5"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS20342.html",
+    "href": "historical_highlights/batched_reports/WS20342.html",
+    "title": "WS20342",
+    "section": "",
+    "text": "Cruise WS20342 surveyed 13 checkpoint stations in the Lower Keys, Middle Keys, Upper Keys during 2020-11-30 to 2020-12-13. The interpolated fields below approximate conditions on 2020-12-06 12:00 EST — the midpoint of the cruise’s model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise’s model window shaded."
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS20342.html#checkpoint-stations-nearest-buoys",
+    "href": "historical_highlights/batched_reports/WS20342.html#checkpoint-stations-nearest-buoys",
+    "title": "WS20342",
+    "section": "Checkpoint stations & nearest buoys",
+    "text": "Checkpoint stations & nearest buoys\n\n\n\n\n\n\n\n\n\n\n\nStation\nRegion\nNearest buoy\nDistance (km)\n\n\n\n\n21LK\nLower Keys\nJohnson_Key\n77.1\n\n\nKW1\nLower Keys\nMurray_Key\n109.4\n\n\nKW2\nLower Keys\nMurray_Key\n106.8\n\n\nWS\nLower Keys\nJohnson_Key\n104.1\n\n\n10\nMiddle Keys\nPeterson_Key\n18.9\n\n\n12\nMiddle Keys\nPeterson_Key\n24.0\n\n\n15\nMiddle Keys\nPeterson_Key\n41.0\n\n\n15.5\nMiddle Keys\nPeterson_Key\n43.9\n\n\n16\nMiddle Keys\nLittle_Rabbit_Key\n51.4\n\n\n18\nMiddle Keys\nLittle_Rabbit_Key\n55.9\n\n\n7\nMiddle Keys\nPeterson_Key\n11.3\n\n\n2\nUpper Keys\nMiddle_Key\n48.7\n\n\nMR\nUpper Keys\nButternut_Kay\n17.6"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS20342.html#interpolated-fields",
+    "href": "historical_highlights/batched_reports/WS20342.html#interpolated-fields",
+    "title": "WS20342",
+    "section": "Interpolated fields",
+    "text": "Interpolated fields\n\nSalinityTemperature"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS20342.html#nearest-buoy-time-series",
+    "href": "historical_highlights/batched_reports/WS20342.html#nearest-buoy-time-series",
+    "title": "WS20342",
+    "section": "Nearest-buoy time series",
+    "text": "Nearest-buoy time series\n\nButternut_Kay\nNearest buoy for checkpoint station(s): MR\n\n\n\nJohnson_Key\nNearest buoy for checkpoint station(s): 21LK, WS\nNo salinity data available for this buoy during the cruise window.\n\n\n\nLittle_Rabbit_Key\nNearest buoy for checkpoint station(s): 16, 18\nNo temperature data available for this buoy during the cruise window.\n\n\nMiddle_Key\nNearest buoy for checkpoint station(s): 2\n\n\n\nMurray_Key\nNearest buoy for checkpoint station(s): KW1, KW2\n\n\n\nPeterson_Key\nNearest buoy for checkpoint station(s): 10, 12, 15, 15.5, 7"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS16207.html",
+    "href": "historical_highlights/batched_reports/WS16207.html",
+    "title": "WS16207",
+    "section": "",
+    "text": "Cruise WS16207 surveyed 10 checkpoint stations in the Lower Keys, Middle Keys, Upper Keys during 2016-07-18 to 2016-07-29. The interpolated fields below approximate conditions on 2016-07-23 12:00 EDT — the midpoint of the cruise’s model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise’s model window shaded."
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS16207.html#checkpoint-stations-nearest-buoys",
+    "href": "historical_highlights/batched_reports/WS16207.html#checkpoint-stations-nearest-buoys",
+    "title": "WS16207",
+    "section": "Checkpoint stations & nearest buoys",
+    "text": "Checkpoint stations & nearest buoys\n\n\n\n\n\n\n\n\n\n\n\nStation\nRegion\nNearest buoy\nDistance (km)\n\n\n\n\n21LK\nLower Keys\nJohnson_Key\n77.1\n\n\nWS\nLower Keys\nJohnson_Key\n104.3\n\n\n10\nMiddle Keys\nPeterson_Key\n18.9\n\n\n12\nMiddle Keys\nPeterson_Key\n24.4\n\n\n18\nMiddle Keys\nLittle_Rabbit_Key\n55.9\n\n\n7\nMiddle Keys\nPeterson_Key\n11.3\n\n\n9\nMiddle Keys\nPeterson_Key\n17.5\n\n\n9.5\nMiddle Keys\nPeterson_Key\n23.0\n\n\n2\nUpper Keys\nMiddle_Key\n48.9\n\n\nMR\nUpper Keys\nButternut_Kay\n16.3"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS16207.html#interpolated-fields",
+    "href": "historical_highlights/batched_reports/WS16207.html#interpolated-fields",
+    "title": "WS16207",
+    "section": "Interpolated fields",
+    "text": "Interpolated fields\n\nSalinityTemperature"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS16207.html#nearest-buoy-time-series",
+    "href": "historical_highlights/batched_reports/WS16207.html#nearest-buoy-time-series",
+    "title": "WS16207",
+    "section": "Nearest-buoy time series",
+    "text": "Nearest-buoy time series\n\nButternut_Kay\nNearest buoy for checkpoint station(s): MR\n\n\n\nJohnson_Key\nNearest buoy for checkpoint station(s): 21LK, WS\nNo salinity data available for this buoy during the cruise window.\n\n\n\nLittle_Rabbit_Key\nNearest buoy for checkpoint station(s): 18\nNo temperature data available for this buoy during the cruise window.\n\n\nMiddle_Key\nNearest buoy for checkpoint station(s): 2\nNo salinity data available for this buoy during the cruise window.\nNo temperature data available for this buoy during the cruise window.\n\n\nPeterson_Key\nNearest buoy for checkpoint station(s): 10, 12, 7, 9, 9.5"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS1015.html",
+    "href": "historical_highlights/batched_reports/WS1015.html",
+    "title": "WS1015",
+    "section": "",
+    "text": "Cruise WS1015 surveyed 12 checkpoint stations in the Lower Keys, Middle Keys, Upper Keys during 2010-08-09 to 2010-08-20. The interpolated fields below approximate conditions on 2010-08-14 12:00 EDT — the midpoint of the cruise’s model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise’s model window shaded."
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS1015.html#checkpoint-stations-nearest-buoys",
+    "href": "historical_highlights/batched_reports/WS1015.html#checkpoint-stations-nearest-buoys",
+    "title": "WS1015",
+    "section": "Checkpoint stations & nearest buoys",
+    "text": "Checkpoint stations & nearest buoys\n\n\n\n\n\n\n\n\n\n\n\nStation\nRegion\nNearest buoy\nDistance (km)\n\n\n\n\n19\nLower Keys\nJohnson_Key\n71.8\n\n\n21.5\nLower Keys\nLittle_Rabbit_Key\n79.1\n\n\n21LK\nLower Keys\nJohnson_Key\n77.0\n\n\n22\nLower Keys\nJohnson_Key\n114.5\n\n\n24\nLower Keys\nJohnson_Key\n109.4\n\n\n12\nMiddle Keys\nPeterson_Key\n24.3\n\n\n15\nMiddle Keys\nPeterson_Key\n40.8\n\n\n15.5\nMiddle Keys\nPeterson_Key\n43.8\n\n\n16\nMiddle Keys\nLittle_Rabbit_Key\n51.2\n\n\n7\nMiddle Keys\nPeterson_Key\n10.9\n\n\n1\nUpper Keys\nMiddle_Key\n48.0\n\n\n6.5\nUpper Keys\nThursday_Point\n19.3"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS1015.html#interpolated-fields",
+    "href": "historical_highlights/batched_reports/WS1015.html#interpolated-fields",
+    "title": "WS1015",
+    "section": "Interpolated fields",
+    "text": "Interpolated fields\n\nSalinityTemperature"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS1015.html#nearest-buoy-time-series",
+    "href": "historical_highlights/batched_reports/WS1015.html#nearest-buoy-time-series",
+    "title": "WS1015",
+    "section": "Nearest-buoy time series",
+    "text": "Nearest-buoy time series\n\nJohnson_Key\nNearest buoy for checkpoint station(s): 19, 21LK, 22, 24\nNo salinity data available for this buoy during the cruise window.\n\n\n\nLittle_Rabbit_Key\nNearest buoy for checkpoint station(s): 21.5, 16\nNo temperature data available for this buoy during the cruise window.\n\n\nMiddle_Key\nNearest buoy for checkpoint station(s): 1\n\n\n\nPeterson_Key\nNearest buoy for checkpoint station(s): 12, 15, 15.5, 7\n\n\n\nThursday_Point\nNearest buoy for checkpoint station(s): 6.5"
+  },
+  {
+    "objectID": "historical_highlights/listing.html",
+    "href": "historical_highlights/listing.html",
+    "title": "Historical Highlights",
+    "section": "",
+    "text": "Each report below pairs DIVAnd-interpolated salinity & temperature fields with time series from the NDBC buoy nearest each cruise checkpoint station, for the cruise’s model window. Click a cruise to see its report.\n\n\n\n\n\n\n\n\n\n\n\nWS23011\n\n\nLower Keys, Middle Keys, Upper Keys · 2023-01-04 to 2023-01-17\n\n\n13 checkpoint stations · 2023-01-04 to 2023-01-17\n\n\n\nJan 4, 2023\n\n\n\n\n\n\n\n\n\n\nWS22281\n\n\nLower Keys, Middle Keys, Upper Keys · 2022-10-01 to 2022-10-14\n\n\n10 checkpoint stations · 2022-10-01 to 2022-10-14\n\n\n\nOct 1, 2022\n\n\n\n\n\n\n\n\n\n\nWS20342\n\n\nLower Keys, Middle Keys, Upper Keys · 2020-11-30 to 2020-12-13\n\n\n13 checkpoint stations · 2020-11-30 to 2020-12-13\n\n\n\nNov 30, 2020\n\n\n\n\n\n\n\n\n\n\nWS17282\n\n\nLower Keys, Middle Keys, Upper Keys · 2017-10-02 to 2017-10-12\n\n\n32 checkpoint stations · 2017-10-02 to 2017-10-12\n\n\n\nOct 2, 2017\n\n\n\n\n\n\n\n\n\n\nWS16207\n\n\nLower Keys, Middle Keys, Upper Keys · 2016-07-18 to 2016-07-29\n\n\n10 checkpoint stations · 2016-07-18 to 2016-07-29\n\n\n\nJul 18, 2016\n\n\n\n\n\n\n\n\n\n\nWS16004\n\n\nLower Keys, Middle Keys, Upper Keys · 2015-12-28 to 2016-01-07\n\n\n11 checkpoint stations · 2015-12-28 to 2016-01-07\n\n\n\nDec 28, 2015\n\n\n\n\n\n\n\n\n\n\nWS1015\n\n\nLower Keys, Middle Keys, Upper Keys · 2010-08-09 to 2010-08-20\n\n\n12 checkpoint stations · 2010-08-09 to 2010-08-20\n\n\n\nAug 9, 2010\n\n\n\n\n\n\n\n\n\n\nWS0603\n\n\nLower Keys, Middle Keys, Upper Keys · 2006-01-11 to 2006-01-25\n\n\n30 checkpoint stations · 2006-01-11 to 2006-01-25\n\n\n\nJan 11, 2006\n\n\n\n\n\n\nNo matching items"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Florida Bay Buoy Explorer",
@@ -19,5 +138,117 @@
     "title": "Florida Bay Buoy Explorer",
     "section": "Build locally",
     "text": "Build locally\nquarto render\nTo publish as a static site on GitHub Pages:\nmake publish"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS0603.html",
+    "href": "historical_highlights/batched_reports/WS0603.html",
+    "title": "WS0603",
+    "section": "",
+    "text": "Cruise WS0603 surveyed 30 checkpoint stations in the Lower Keys, Middle Keys, Upper Keys during 2006-01-11 to 2006-01-25. The interpolated fields below approximate conditions on 2006-01-18 12:00 EST — the midpoint of the cruise’s model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise’s model window shaded."
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS0603.html#checkpoint-stations-nearest-buoys",
+    "href": "historical_highlights/batched_reports/WS0603.html#checkpoint-stations-nearest-buoys",
+    "title": "WS0603",
+    "section": "Checkpoint stations & nearest buoys",
+    "text": "Checkpoint stations & nearest buoys\n\n\n\n\n\n\n\n\n\n\n\nStation\nRegion\nNearest buoy\nDistance (km)\n\n\n\n\n19\nLower Keys\nJohnson_Key\n71.8\n\n\n20\nLower Keys\nJohnson_Key\n74.3\n\n\n21.5\nLower Keys\nLittle_Rabbit_Key\n79.7\n\n\n21LK\nLower Keys\nJohnson_Key\n76.9\n\n\n22\nLower Keys\nJohnson_Key\n114.5\n\n\n22.5\nLower Keys\nJohnson_Key\n118.5\n\n\n23\nLower Keys\nJohnson_Key\n112.6\n\n\n24\nLower Keys\nJohnson_Key\n109.5\n\n\n10\nMiddle Keys\nPeterson_Key\n18.5\n\n\n11\nMiddle Keys\nPeterson_Key\n20.9\n\n\n12\nMiddle Keys\nPeterson_Key\n24.2\n\n\n13\nMiddle Keys\nPeterson_Key\n37.3\n\n\n14\nMiddle Keys\nPeterson_Key\n38.9\n\n\n15\nMiddle Keys\nPeterson_Key\n41.1\n\n\n15.5\nMiddle Keys\nPeterson_Key\n43.8\n\n\n16\nMiddle Keys\nLittle_Rabbit_Key\n51.2\n\n\n17\nMiddle Keys\nLittle_Rabbit_Key\n53.4\n\n\n18\nMiddle Keys\nLittle_Rabbit_Key\n55.8\n\n\n7\nMiddle Keys\nPeterson_Key\n11.1\n\n\n8\nMiddle Keys\nPeterson_Key\n14.1\n\n\n9\nMiddle Keys\nPeterson_Key\n17.4\n\n\n9.5\nMiddle Keys\nPeterson_Key\n23.2\n\n\n1\nUpper Keys\nMiddle_Key\n47.8\n\n\n2\nUpper Keys\nMiddle_Key\n48.9\n\n\n3\nUpper Keys\nMiddle_Key\n50.5\n\n\n4\nUpper Keys\nBlackwater_Sound\n9.8\n\n\n5\nUpper Keys\nThursday_Point\n12.4\n\n\n5.5\nUpper Keys\nThursday_Point\n14.5\n\n\n6\nUpper Keys\nThursday_Point\n16.4\n\n\n6.5\nUpper Keys\nThursday_Point\n19.2"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS0603.html#interpolated-fields",
+    "href": "historical_highlights/batched_reports/WS0603.html#interpolated-fields",
+    "title": "WS0603",
+    "section": "Interpolated fields",
+    "text": "Interpolated fields\n\nSalinityTemperature"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS0603.html#nearest-buoy-time-series",
+    "href": "historical_highlights/batched_reports/WS0603.html#nearest-buoy-time-series",
+    "title": "WS0603",
+    "section": "Nearest-buoy time series",
+    "text": "Nearest-buoy time series\n\nBlackwater_Sound\nNearest buoy for checkpoint station(s): 4\n\n\n\nJohnson_Key\nNearest buoy for checkpoint station(s): 19, 20, 21LK, 22, 22.5, 23, 24\nNo salinity data available for this buoy during the cruise window.\nNo temperature data available for this buoy during the cruise window.\n\n\nLittle_Rabbit_Key\nNearest buoy for checkpoint station(s): 21.5, 16, 17, 18\nNo salinity data available for this buoy during the cruise window.\nNo temperature data available for this buoy during the cruise window.\n\n\nMiddle_Key\nNearest buoy for checkpoint station(s): 1, 2, 3\n\n\n\nPeterson_Key\nNearest buoy for checkpoint station(s): 10, 11, 12, 13, 14, 15, 15.5, 7, 8, 9, 9.5\nNo salinity data available for this buoy during the cruise window.\nNo temperature data available for this buoy during the cruise window.\n\n\nThursday_Point\nNearest buoy for checkpoint station(s): 5, 5.5, 6, 6.5"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS16004.html",
+    "href": "historical_highlights/batched_reports/WS16004.html",
+    "title": "WS16004",
+    "section": "",
+    "text": "Cruise WS16004 surveyed 11 checkpoint stations in the Lower Keys, Middle Keys, Upper Keys during 2015-12-28 to 2016-01-07. The interpolated fields below approximate conditions on 2016-01-02 12:00 EST — the midpoint of the cruise’s model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise’s model window shaded."
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS16004.html#checkpoint-stations-nearest-buoys",
+    "href": "historical_highlights/batched_reports/WS16004.html#checkpoint-stations-nearest-buoys",
+    "title": "WS16004",
+    "section": "Checkpoint stations & nearest buoys",
+    "text": "Checkpoint stations & nearest buoys\n\n\n\n\n\n\n\n\n\n\n\nStation\nRegion\nNearest buoy\nDistance (km)\n\n\n\n\n21LK\nLower Keys\nJohnson_Key\n77.0\n\n\nWS\nLower Keys\nJohnson_Key\n104.1\n\n\n10\nMiddle Keys\nPeterson_Key\n18.6\n\n\n12\nMiddle Keys\nPeterson_Key\n24.7\n\n\n16\nMiddle Keys\nLittle_Rabbit_Key\n51.2\n\n\n18\nMiddle Keys\nLittle_Rabbit_Key\n56.1\n\n\n7\nMiddle Keys\nPeterson_Key\n11.0\n\n\n9\nMiddle Keys\nPeterson_Key\n17.8\n\n\n9.5\nMiddle Keys\nPeterson_Key\n23.5\n\n\n2\nUpper Keys\nMiddle_Key\n48.9\n\n\nMR\nUpper Keys\nButternut_Kay\n16.3"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS16004.html#interpolated-fields",
+    "href": "historical_highlights/batched_reports/WS16004.html#interpolated-fields",
+    "title": "WS16004",
+    "section": "Interpolated fields",
+    "text": "Interpolated fields\n\nSalinityTemperature"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS16004.html#nearest-buoy-time-series",
+    "href": "historical_highlights/batched_reports/WS16004.html#nearest-buoy-time-series",
+    "title": "WS16004",
+    "section": "Nearest-buoy time series",
+    "text": "Nearest-buoy time series\n\nButternut_Kay\nNearest buoy for checkpoint station(s): MR\n\n\n\nJohnson_Key\nNearest buoy for checkpoint station(s): 21LK, WS\nNo salinity data available for this buoy during the cruise window.\n\n\n\nLittle_Rabbit_Key\nNearest buoy for checkpoint station(s): 16, 18\nNo temperature data available for this buoy during the cruise window.\n\n\nMiddle_Key\nNearest buoy for checkpoint station(s): 2\n\n\n\nPeterson_Key\nNearest buoy for checkpoint station(s): 10, 12, 7, 9, 9.5"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS17282.html",
+    "href": "historical_highlights/batched_reports/WS17282.html",
+    "title": "WS17282",
+    "section": "",
+    "text": "Cruise WS17282 surveyed 32 checkpoint stations in the Lower Keys, Middle Keys, Upper Keys during 2017-10-02 to 2017-10-12. The interpolated fields below approximate conditions on 2017-10-07 12:00 EDT — the midpoint of the cruise’s model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise’s model window shaded."
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS17282.html#checkpoint-stations-nearest-buoys",
+    "href": "historical_highlights/batched_reports/WS17282.html#checkpoint-stations-nearest-buoys",
+    "title": "WS17282",
+    "section": "Checkpoint stations & nearest buoys",
+    "text": "Checkpoint stations & nearest buoys\n\n\n\n\n\n\n\n\n\n\n\nStation\nRegion\nNearest buoy\nDistance (km)\n\n\n\n\n19\nLower Keys\nJohnson_Key\n71.8\n\n\n20\nLower Keys\nJohnson_Key\n74.5\n\n\n21.5\nLower Keys\nLittle_Rabbit_Key\n79.6\n\n\n21LK\nLower Keys\nJohnson_Key\n77.6\n\n\n22\nLower Keys\nJohnson_Key\n114.9\n\n\n22.5\nLower Keys\nJohnson_Key\n118.8\n\n\n23\nLower Keys\nJohnson_Key\n112.6\n\n\n24\nLower Keys\nJohnson_Key\n109.7\n\n\nWS\nLower Keys\nJohnson_Key\n104.1\n\n\n10\nMiddle Keys\nPeterson_Key\n18.5\n\n\n11\nMiddle Keys\nPeterson_Key\n20.9\n\n\n12\nMiddle Keys\nPeterson_Key\n24.3\n\n\n14\nMiddle Keys\nPeterson_Key\n38.8\n\n\n15\nMiddle Keys\nPeterson_Key\n40.9\n\n\n15.5\nMiddle Keys\nPeterson_Key\n43.8\n\n\n16\nMiddle Keys\nLittle_Rabbit_Key\n51.2\n\n\n17\nMiddle Keys\nLittle_Rabbit_Key\n53.7\n\n\n18\nMiddle Keys\nLittle_Rabbit_Key\n57.7\n\n\n8\nMiddle Keys\nPeterson_Key\n14.1\n\n\n9\nMiddle Keys\nPeterson_Key\n17.3\n\n\n9.5\nMiddle Keys\nPeterson_Key\n22.4\n\n\n1\nUpper Keys\nMiddle_Key\n47.7\n\n\n2\nUpper Keys\nMiddle_Key\n48.7\n\n\n3\nUpper Keys\nMiddle_Key\n50.7\n\n\n5\nUpper Keys\nThursday_Point\n12.6\n\n\n6\nUpper Keys\nThursday_Point\n16.6\n\n\n6.5\nUpper Keys\nThursday_Point\n19.1\n\n\nEKIN\nUpper Keys\nMiddle_Key\n17.8\n\n\nEKOFF\nUpper Keys\nThursday_Point\n23.4\n\n\nMR\nUpper Keys\nButternut_Kay\n17.3\n\n\nUKIN\nUpper Keys\nBob_Allen_Key\n15.4\n\n\nUKOFF\nUpper Keys\nBob_Allen_Key\n21.1"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS17282.html#interpolated-fields",
+    "href": "historical_highlights/batched_reports/WS17282.html#interpolated-fields",
+    "title": "WS17282",
+    "section": "Interpolated fields",
+    "text": "Interpolated fields\n\nSalinityTemperature"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS17282.html#nearest-buoy-time-series",
+    "href": "historical_highlights/batched_reports/WS17282.html#nearest-buoy-time-series",
+    "title": "WS17282",
+    "section": "Nearest-buoy time series",
+    "text": "Nearest-buoy time series\n\nBob_Allen_Key\nNearest buoy for checkpoint station(s): UKIN, UKOFF\n\n\n\nButternut_Kay\nNearest buoy for checkpoint station(s): MR\n\n\n\nJohnson_Key\nNearest buoy for checkpoint station(s): 19, 20, 21LK, 22, 22.5, 23, 24, WS\nNo salinity data available for this buoy during the cruise window.\n\n\n\nLittle_Rabbit_Key\nNearest buoy for checkpoint station(s): 21.5, 16, 17, 18\nNo temperature data available for this buoy during the cruise window.\n\n\nMiddle_Key\nNearest buoy for checkpoint station(s): 1, 2, 3, EKIN\n\n\n\nPeterson_Key\nNearest buoy for checkpoint station(s): 10, 11, 12, 14, 15, 15.5, 8, 9, 9.5\n\n\n\nThursday_Point\nNearest buoy for checkpoint station(s): 5, 6, 6.5, EKOFF"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS22281.html",
+    "href": "historical_highlights/batched_reports/WS22281.html",
+    "title": "WS22281",
+    "section": "",
+    "text": "Cruise WS22281 surveyed 10 checkpoint stations in the Lower Keys, Middle Keys, Upper Keys during 2022-10-01 to 2022-10-14. The interpolated fields below approximate conditions on 2022-10-07 12:00 EDT — the midpoint of the cruise’s model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise’s model window shaded."
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS22281.html#checkpoint-stations-nearest-buoys",
+    "href": "historical_highlights/batched_reports/WS22281.html#checkpoint-stations-nearest-buoys",
+    "title": "WS22281",
+    "section": "Checkpoint stations & nearest buoys",
+    "text": "Checkpoint stations & nearest buoys\n\n\n\n\n\n\n\n\n\n\n\nStation\nRegion\nNearest buoy\nDistance (km)\n\n\n\n\n21LK\nLower Keys\nJohnson_Key\n77.4\n\n\nKW1\nLower Keys\nMurray_Key\n109.3\n\n\nKW2\nLower Keys\nMurray_Key\n106.3\n\n\nWS\nLower Keys\nJohnson_Key\n104.1\n\n\n12\nMiddle Keys\nPeterson_Key\n24.4\n\n\n16\nMiddle Keys\nLittle_Rabbit_Key\n51.6\n\n\n18\nMiddle Keys\nLittle_Rabbit_Key\n55.9\n\n\n9\nMiddle Keys\nPeterson_Key\n17.5\n\n\n9.5\nMiddle Keys\nPeterson_Key\n23.0\n\n\n2\nUpper Keys\nMiddle_Key\n48.4"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS22281.html#interpolated-fields",
+    "href": "historical_highlights/batched_reports/WS22281.html#interpolated-fields",
+    "title": "WS22281",
+    "section": "Interpolated fields",
+    "text": "Interpolated fields\n\nSalinityTemperature"
+  },
+  {
+    "objectID": "historical_highlights/batched_reports/WS22281.html#nearest-buoy-time-series",
+    "href": "historical_highlights/batched_reports/WS22281.html#nearest-buoy-time-series",
+    "title": "WS22281",
+    "section": "Nearest-buoy time series",
+    "text": "Nearest-buoy time series\n\nJohnson_Key\nNearest buoy for checkpoint station(s): 21LK, WS\nNo salinity data available for this buoy during the cruise window.\n\n\n\nLittle_Rabbit_Key\nNearest buoy for checkpoint station(s): 16, 18\nNo temperature data available for this buoy during the cruise window.\n\n\nMiddle_Key\nNearest buoy for checkpoint station(s): 2\n\n\n\nMurray_Key\nNearest buoy for checkpoint station(s): KW1, KW2\n\n\n\nPeterson_Key\nNearest buoy for checkpoint station(s): 12, 9, 9.5"
   }
 ]
