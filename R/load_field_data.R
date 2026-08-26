@@ -1,4 +1,4 @@
-source("R/ndbc_time.R")
+source(here::here("R/ndbc_time.R"))
 
 load_cached_hourly_fields <- function(
     value_col,
@@ -7,12 +7,12 @@ load_cached_hourly_fields <- function(
 ) {
   lapply(hours, function(hour) {
     suffix <- sprintf("_%02dh", hour)
-    obs_file <- file.path(
+    obs_file <- here::here(
       "data",
       "interpolated",
       sprintf("%s_obs%s.csv", value_col, suffix)
     )
-    field_file <- file.path(
+    field_file <- here::here(
       "data",
       "interpolated",
       sprintf("%s_field%s.csv", value_col, suffix)

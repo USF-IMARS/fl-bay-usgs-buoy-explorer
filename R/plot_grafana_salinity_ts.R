@@ -1,4 +1,4 @@
-source("R/ndbc_time.R")
+source(here::here("R/ndbc_time.R"))
 
 GRAFANA_BASE <- "https://mbon-dashboards.marine.usf.edu"
 GRAFANA_DASHBOARD_UID <- "cfraol6xev5kwd"

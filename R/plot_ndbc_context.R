@@ -1,4 +1,4 @@
-source("R/ndbc_time.R")
+source(here::here("R/ndbc_time.R"))
 
 context_status_colors <- c(
   low = "#2166ac",

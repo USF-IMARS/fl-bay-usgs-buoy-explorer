@@ -1,4 +1,4 @@
-source("R/ndbc_time.R")
+source(here::here("R/ndbc_time.R"))
 
 field_slice_grid <- function(field_slice) {
   lons <- sort(unique(field_slice$longitude))

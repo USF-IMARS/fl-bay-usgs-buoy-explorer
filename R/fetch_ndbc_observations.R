@@ -1,4 +1,4 @@
-source("R/ndbc_time.R")
+source(here::here("R/ndbc_time.R"))
 
 ndbc_stations <- list(
   list(name = "bkyf1", long_name = "Buoy_Key"),
@@ -332,12 +332,12 @@ interpolate_ndbc_field <- function(
     suffix = "",
     cache_id = "ndbc_buoys"
 ) {
-  obs_file <- file.path(
+  obs_file <- here::here(
     "data",
     "interpolated",
     sprintf("%s_obs%s.csv", value_col, suffix)
   )
-  field_file <- file.path(
+  field_file <- here::here(
     "data",
     "interpolated",
     sprintf("%s_field%s.csv", value_col, suffix)
@@ -349,7 +349,7 @@ interpolate_ndbc_field <- function(
     readr::write_csv(obs_file)
 
   interp_log <- system2(
-    "scripts/run_interpolate_field.sh",
+    here::here("scripts", "run_interpolate_field.sh"),
     c(obs_file, field_file, cache_id),
     stdout = TRUE,
     stderr = TRUE

@@ -1,8 +1,11 @@
+# batched reports
+historical_highlights/batched_reports/
+
 _site/
 .quarto/
 _freeze/
 
-# Local symlinks to sibling repo caches (optional)
+# Downloaded/generated caches: interpolated fields, BlueTopo bathymetry, land masks
 data/
 
 .Rproj.user

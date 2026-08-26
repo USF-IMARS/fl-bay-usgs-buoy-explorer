@@ -1,4 +1,4 @@
-source("R/fetch_ndbc_observations.R")
+source(here::here("R/fetch_ndbc_observations.R"))
 
 ndbc_param_specs <- list(
   salinity = list(

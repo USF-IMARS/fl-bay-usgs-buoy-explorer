@@ -1,4 +1,4 @@
-source("R/ndbc_time.R")
+source(here::here("R/ndbc_time.R"))
 
 SALINITY_GAUGE_MIN <- 10
 SALINITY_GAUGE_MAX <- 50

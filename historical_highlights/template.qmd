@@ -1,0 +1,173 @@
+---
+title: "EXAMPLE_CRUISE_ID"
+subtitle: "EXAMPLE_REGIONS · EXAMPLE_WINDOW_START to EXAMPLE_WINDOW_END"
+description: "EXAMPLE_N_STATIONS checkpoint stations · EXAMPLE_WINDOW_START to EXAMPLE_WINDOW_END"
+date: EXAMPLE_WINDOW_START
+author: "USGS / SECOORA ERDDAP"
+format: html
+params:
+  cruise_id: "EXAMPLE_CRUISE_ID"
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+<!--
+This is the template used to generate a report for each cruise_id in
+data/keys_checkpoints_flat.csv (see ../generate_batch_qmds.R).
+-->
+
+```{r setup}
+#| output: false
+
+library(dplyr)
+library(ggplot2)
+library(htmltools)
+library(leaflet)
+library(readr)
+
+source(here::here("R", "ndbc_time.R"))
+source(here::here("R", "fetch_ndbc_observations.R"))
+source(here::here("R", "plot_ndbc_field.R"))
+source(here::here("R", "plot_cruise_timeseries.R"))
+source(here::here("R", "cruise_reports.R"))
+
+report <- build_cruise_report(params$cruise_id)
+
+salinity_palette <- c(
+  "#2166ac", "#67a9cf", "#d1e5f0",
+  "#fddbc7", "#ef8a62", "#b2182b"
+)
+temperature_palette <- c(
+  "#313695", "#74add1", "#abd9e9",
+  "#fee090", "#f46d43", "#a50026"
+)
+
+window_label <- sprintf(
+  "%s to %s",
+  format(report$info$window_start),
+  format(report$info$window_end)
+)
+regions_label <- paste(report$info$regions, collapse = ", ")
+target_time_label <- format_ndbc_time(report$salinity$target_time)
+```
+
+Cruise **`r params$cruise_id`** surveyed **`r nrow(report$info$stations)`** checkpoint stations in the **`r regions_label`** during **`r window_label`**. The interpolated fields below approximate conditions on **`r target_time_label`** — the midpoint of the cruise's model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise's model window shaded.
+
+## Checkpoint stations & nearest buoys
+
+```{r station-map}
+#| fig-width: 9
+#| fig-height: 6
+plot_cruise_station_map(report$matched_stations)
+```
+
+```{r station-table}
+report$matched_stations |>
+  select(
+    Station = station,
+    Region = region,
+    `Nearest buoy` = nearest_station,
+    `Distance (km)` = nearest_distance_km
+  ) |>
+  mutate(`Distance (km)` = sprintf("%.1f", `Distance (km)`)) |>
+  knitr::kable()
+```
+
+## Interpolated fields
+
+::: {.panel-tabset}
+
+### Salinity
+
+```{r salinity-field}
+#| fig-width: 9
+#| fig-height: 6
+if (is.null(report$salinity_field) || nrow(report$salinity_field) == 0) {
+  tags$p(
+    class = "cruise-field-unavailable",
+    "Interpolated salinity field unavailable for this cruise window (insufficient buoy coverage or interpolation failure)."
+  )
+} else {
+  plot_ndbc_field(
+    report$salinity_field,
+    report$salinity$snapshot,
+    value_col = "salinity",
+    legend_title = "Salinity (PSU)",
+    popup_suffix = " PSU",
+    palette = salinity_palette
+  )
+}
+```
+
+### Temperature
+
+```{r temperature-field}
+#| fig-width: 9
+#| fig-height: 6
+if (is.null(report$temperature_field) || nrow(report$temperature_field) == 0) {
+  tags$p(
+    class = "cruise-field-unavailable",
+    "Interpolated temperature field unavailable for this cruise window (insufficient buoy coverage or interpolation failure)."
+  )
+} else {
+  plot_ndbc_field(
+    report$temperature_field,
+    report$temperature$snapshot,
+    value_col = "temperature",
+    legend_title = "Temperature (°C)",
+    popup_suffix = " °C",
+    palette = temperature_palette
+  )
+}
+```
+
+:::
+
+## Nearest-buoy time series
+
+```{r buoy-timeseries}
+#| output: asis
+#| fig-width: 9
+#| fig-height: 3.5
+
+for (i in seq_len(nrow(report$unique_buoys))) {
+  buoy <- report$unique_buoys[i, ]
+  matched_names <- report$matched_stations |>
+    filter(nearest_station_id == buoy$nearest_station_id) |>
+    pull(station)
+
+  cat(sprintf("\n\n### %s\n\n", buoy$nearest_station))
+  cat(sprintf(
+    "Nearest buoy for checkpoint station(s): %s\n\n",
+    paste(matched_names, collapse = ", ")
+  ))
+
+  sal_df <- report$salinity$series |> filter(station_id == buoy$nearest_station_id)
+  temp_df <- report$temperature$series |> filter(station_id == buoy$nearest_station_id)
+
+  sal_plot <- plot_cruise_timeseries(
+    sal_df, "salinity", "Salinity (PSU)", buoy$nearest_station,
+    report$info$window_start, report$info$window_end,
+    line_color = "#08519c"
+  )
+  temp_plot <- plot_cruise_timeseries(
+    temp_df, "temperature", "Temperature (°C)", buoy$nearest_station,
+    report$info$window_start, report$info$window_end,
+    line_color = "#a50026"
+  )
+
+  if (!is.null(sal_plot)) {
+    print(sal_plot)
+  } else {
+    cat("No salinity data available for this buoy during the cruise window.\n\n")
+  }
+
+  if (!is.null(temp_plot)) {
+    print(temp_plot)
+  } else {
+    cat("No temperature data available for this buoy during the cruise window.\n\n")
+  }
+}
+```
