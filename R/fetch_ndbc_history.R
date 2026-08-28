@@ -39,6 +39,7 @@ ndbc_valid_range <- function(value_col) {
     value_col,
     salinity = c(5, 55),
     temperature = c(10, 40),
+    precip_mm = c(0, 300),
     c(-Inf, Inf)
   )
 }

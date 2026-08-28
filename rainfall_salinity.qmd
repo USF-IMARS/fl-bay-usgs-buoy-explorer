@@ -1,0 +1,177 @@
+---
+title: "Rainfall & Salinity"
+subtitle: "Where is the low-salinity water coming from?"
+author: "USGS / SECOORA ERDDAP"
+format:
+  dashboard:
+    theme: cosmo
+    css: styles.css
+    nav-buttons:
+      - icon: github
+        href: https://github.com/usf-imars/fl-bay-usgs-buoy-explorer
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| output: false
+
+library(dplyr)
+library(ggplot2)
+library(htmltools)
+library(leaflet)
+library(patchwork)
+library(scales)
+
+source(here::here("R/fetch_ndbc_history.R"))
+source(here::here("R/fetch_ndbc_rainfall.R"))
+source(here::here("R/plot_rainfall_salinity.R"))
+
+lookback_days <- 60
+
+rain_sal <- fetch_rainfall_salinity_history(lookback_days = lookback_days)
+
+sal_history <- prepare_ndbc_history(rain_sal$salinity, "salinity")
+daily_salinity <- network_daily_means(sal_history, "salinity")
+latest_salinity <- latest_ndbc_readings(sal_history, "salinity")
+
+cumulative_precip <- station_cumulative_precip(rain_sal$precip)
+daily_precip <- network_daily_precip(rain_sal$precip)
+
+rain_sal_joined <- rainfall_salinity_by_station(cumulative_precip, latest_salinity)
+
+rain_palette <- c("#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b")
+salinity_palette <- c(
+  "#2166ac", "#67a9cf", "#d1e5f0",
+  "#fddbc7", "#ef8a62", "#b2182b"
+)
+
+mean_network_rain_mm <- mean(cumulative_precip$cumulative_mm, na.rm = TRUE)
+wettest_buoy <- cumulative_precip$station[which.max(cumulative_precip$cumulative_mm)]
+freshest_buoy <- latest_salinity$station[which.min(latest_salinity$salinity)]
+rain_salinity_cor <- suppressWarnings(
+  cor(rain_sal_joined$cumulative_mm, rain_sal_joined$salinity, use = "complete.obs")
+)
+
+report_time <- format(Sys.time(), "%Y-%m-%d %H:%M %Z", tz = ndbc_display_tz)
+data_as_of_label <- format_ndbc_time(rain_sal$data_as_of)
+```
+
+::: {.content-visible when-format="dashboard"}
+Buoy-mounted rain gauges and salinity sensors, past **`r lookback_days` days**, from [SECOORA ERDDAP](https://erddap.secoora.org/erddap/index.html) Everglades National Park buoys.
+**Report:** `r report_time` · **Latest data:** `r data_as_of_label`
+:::
+
+# Overview
+
+## Row
+
+```{r}
+#| content: valuebox
+#| title: Network mean rainfall
+#| icon: cloud-rain
+#| color: info
+list(value = sprintf("%.0f mm", mean_network_rain_mm))
+```
+
+```{r}
+#| content: valuebox
+#| title: Wettest buoy
+#| icon: cloud-rain-heavy
+#| color: primary
+list(value = wettest_buoy)
+```
+
+```{r}
+#| content: valuebox
+#| title: Freshest buoy (latest)
+#| icon: droplet
+#| color: secondary
+list(value = freshest_buoy)
+```
+
+```{r}
+#| content: valuebox
+#| title: Rainfall–salinity correlation
+#| icon: graph-up
+#| color: warning
+list(value = sprintf("r = %.2f", rain_salinity_cor))
+```
+
+## Row {height=55%}
+
+```{r rain-map}
+#| title: Cumulative rainfall by buoy
+#| padding: 0px
+
+plot_station_value_map(
+  cumulative_precip,
+  value_col = "cumulative_mm",
+  legend_title = sprintf("Rain, %d d (mm)", lookback_days),
+  palette = rain_palette,
+  popup_suffix = " mm"
+)
+```
+
+```{r salinity-map}
+#| title: Latest salinity by buoy
+#| padding: 0px
+
+plot_station_value_map(
+  latest_salinity,
+  value_col = "salinity",
+  legend_title = "Salinity (PSU)",
+  palette = salinity_palette,
+  popup_suffix = " PSU"
+)
+```
+
+## Row {height=45%}
+
+::: {.card title="How to read this page"}
+Florida Bay salinity depends on both **local rainfall** (falling directly on the bay) and **freshwater delivered from elsewhere** — mainly overland/canal flow out of the Everglades watershed (Taylor Slough, Shark River Slough, and South Florida Water Management District canals) reaching the bay well after it fell as rain, often miles away.
+
+The two maps above let you compare **where it rained** against **where the water is fresh right now**. If the freshest buoys are also the wettest, that points to local rain-driven freshening. If the freshest buoys sit in places with modest local rainfall, the fresher water is more likely arriving from upstream Everglades inflow rather than falling in place.
+
+The scatter plot on the **Rainfall vs Salinity** tab tests this directly across all buoys, and the time series tab shows whether network-wide salinity dips line up with rain events or drifts independently of them.
+:::
+
+# Time Series
+
+## Row
+
+```{r rain-salinity-timeseries}
+#| title: Network mean rainfall and salinity
+#| fig-width: 12
+#| fig-height: 7
+
+plot_rainfall_salinity_timeseries(daily_precip, daily_salinity)
+```
+
+## Row
+
+::: {.card title="Reading the time series"}
+The top panel is the **network mean daily rainfall** (each buoy's daily total, averaged across all reporting buoys). The bottom panel is the **network mean daily salinity**. A short-lived dip in salinity right after a rain spike suggests a direct, local response; a longer-term drift with no clear tie to individual rain days points to a slower-acting or upstream source.
+:::
+
+# Rainfall vs Salinity
+
+## Row
+
+```{r rain-salinity-scatter}
+#| title: Cumulative rainfall vs. latest salinity
+#| fig-width: 10
+#| fig-height: 6.5
+
+plot_rainfall_salinity_scatter(rain_sal_joined, lookback_days)
+```
+
+## Row
+
+::: {.card title="Interpreting the scatter"}
+Each point is one buoy: **x** is that buoy's total rainfall over the past `r lookback_days` days; **y** is its most recent salinity reading. A **downward** trend (more local rain → lower salinity) would support locally rain-driven freshening. A **flat or upward** trend means the buoys with the most local rain aren't the freshest ones — evidence that the low-salinity water at those buoys is arriving from somewhere else in the watershed rather than falling there directly.
+
+This is a snapshot correlation across buoys, not a rainfall-runoff model — it's a diagnostic starting point, not proof of source. Treat a strong relationship as a lead worth checking against known freshwater inflow structures, and a weak one as a sign to look upstream (Everglades sheet flow and canal discharge) rather than at local weather.
+:::

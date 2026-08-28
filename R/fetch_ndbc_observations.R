@@ -24,6 +24,10 @@ ndbc_stations <- list(
 
 ndbc_field_hours <- c(6, 12, 18, 24)
 
+# hourly rainfall total (mm) reported alongside salinity/temperature at the
+# same NPS/NDBC stations
+ndbc_precip_param <- "lwe_thickness_of_precipitation_amount_cm_time__sum_over_pt1h"
+
 fetch_ndbc_erddap_end_time <- function(station = "bkyf1") {
   for (lookback_days in c(90, 365, 3650)) {
     start_time <- format(
@@ -108,6 +112,8 @@ fetch_ndbc_timeseries <- function(station_info, param, start_time, end_time) {
     value_col <- "salinity"
   } else if (param == "sea_water_temperature") {
     value_col <- "temperature"
+  } else if (param == ndbc_precip_param) {
+    value_col <- "precip_mm"
   } else {
     stop("Unsupported ERDDAP parameter: ", param)
   }

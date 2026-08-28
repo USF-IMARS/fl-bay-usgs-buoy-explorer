@@ -9,6 +9,7 @@ project:
     - maps_dashboard.qmd
     - context_dashboard.qmd
     - cluster_dashboard.qmd
+    - rainfall_salinity.qmd
     - historical_highlights/listing.qmd
     - historical_highlights/batched_reports/*.qmd
 
@@ -24,6 +25,8 @@ website:
         text: Current vs Usual
       - href: historical_highlights/listing.qmd
         text: Historical Highlights
+      - href: rainfall_salinity.qmd
+        text: Rainfall & Salinity
       - text: Other Analyses
         menu:
           - href: dashboard.qmd

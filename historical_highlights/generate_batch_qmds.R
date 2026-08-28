@@ -17,9 +17,6 @@ librarian::shelf(dplyr, glue, here, whisker, readr)
 
 source(here::here("R", "cruise_reports.R"))
 
-if (dir.exists(REPORTS_DIR)) {
-  unlink(REPORTS_DIR, recursive = TRUE)
-}
 dir.create(REPORTS_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # the template.qmd file uses EXAMPLE_<FIELD> placeholders (all-caps so they
@@ -36,17 +33,32 @@ for (key in TEMPLATE_REPLACEMENTS_KEY) {
 }
 templ <- paste(templ_lines, collapse = "\n")
 
+# `quarto preview` watches the whole project tree to decide when to
+# live-reload, so rewriting every report file on every pre-render pass
+# (even when nothing changed) creates filesystem churn that can race with
+# its own in-progress render of unrelated files. Only touch a file when its
+# content actually changes.
 create_report <- function(params) {
-  print(glue("=== creating cruise report for '{params$cruise_id}' ==="))
+  out_file <- file.path(REPORTS_DIR, glue("{params$cruise_id}.qmd"))
   rendered <- whisker::whisker.render(templ, params)
-  writeLines(
-    rendered,
-    file.path(REPORTS_DIR, glue("{params$cruise_id}.qmd"))
-  )
+
+  previous <- if (file.exists(out_file)) {
+    paste(readLines(out_file, warn = FALSE), collapse = "\n")
+  } else {
+    NA_character_
+  }
+
+  if (!identical(rendered, previous)) {
+    print(glue("=== creating cruise report for '{params$cruise_id}' ==="))
+    writeLines(rendered, out_file)
+  }
+
+  basename(out_file)
 }
 
 checkpoints <- read_cruise_checkpoints()
-for (cruise_id_value in list_cruise_ids(checkpoints)) {
+cruise_ids <- list_cruise_ids(checkpoints)
+current_files <- vapply(cruise_ids, function(cruise_id_value) {
   info <- cruise_summary(cruise_id_value, checkpoints)
   create_report(list(
     cruise_id = info$cruise_id,
@@ -55,4 +67,10 @@ for (cruise_id_value in list_cruise_ids(checkpoints)) {
     regions = paste(info$regions, collapse = ", "),
     n_stations = nrow(info$stations)
   ))
+}, character(1))
+
+# remove reports for cruises no longer in the checkpoints CSV
+stale_files <- setdiff(list.files(REPORTS_DIR, pattern = "\\.qmd$"), current_files)
+if (length(stale_files) > 0) {
+  unlink(file.path(REPORTS_DIR, stale_files))
 }
