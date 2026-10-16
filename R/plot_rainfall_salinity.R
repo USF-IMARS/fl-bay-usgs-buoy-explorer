@@ -19,7 +19,7 @@ plot_station_value_map <- function(
   pal <- leaflet::colorNumeric(palette, domain = df$map_value, na.color = na_color)
 
   leaflet::leaflet(df) |>
-    leaflet::addProviderTiles("CartoDB.Positron") |>
+    leaflet::addProviderTiles("Esri.WorldGrayCanvas") |>
     leaflet::setView(
       lng = mean(df$longitude, na.rm = TRUE),
       lat = mean(df$latitude, na.rm = TRUE),

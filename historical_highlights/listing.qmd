@@ -1,7 +1,7 @@
 ---
 title: "Historical Highlights"
-subtitle: "Interpolated field maps and nearby buoy time series for each Florida Bay cruise"
-description: "Reports generated per cruise from data/keys_checkpoints_flat.csv."
+subtitle: "Interpolated field maps and nearby buoy time series for each Florida Bay cruise and notable event"
+description: "Reports generated per entry from data/keys_checkpoints_flat.csv."
 format: html
 listing:
   contents: batched_reports
@@ -12,4 +12,4 @@ listing:
   filter-ui: false
 ---
 
-Each report below pairs **DIVAnd**-interpolated salinity & temperature fields with time series from the NDBC buoy nearest each cruise checkpoint station, for the cruise's model window. Click a cruise to see its report.
+Each report below pairs **DIVAnd**-interpolated salinity & temperature fields with time series from the NDBC buoy nearest each checkpoint station, over that entry's model window. Click a report to see it.

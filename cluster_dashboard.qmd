@@ -184,7 +184,7 @@ pal_cluster <- colorFactor(
 )
 
 leaflet(stats_df) |>
-  addProviderTiles("CartoDB.Positron") |>
+  addProviderTiles("Esri.WorldGrayCanvas") |>
   setView(
     lng = mean(stats_df$longitude),
     lat = mean(stats_df$latitude),

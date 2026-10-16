@@ -1,5 +1,5 @@
 ---
-title: "EXAMPLE_CRUISE_ID"
+title: "EXAMPLE_LABEL"
 subtitle: "EXAMPLE_REGIONS · EXAMPLE_WINDOW_START to EXAMPLE_WINDOW_END"
 description: "EXAMPLE_N_STATIONS checkpoint stations · EXAMPLE_WINDOW_START to EXAMPLE_WINDOW_END"
 date: EXAMPLE_WINDOW_START
@@ -14,8 +14,10 @@ execute:
 ---
 
 <!--
-This is the template used to generate a report for each cruise_id in
-data/keys_checkpoints_flat.csv (see ../generate_batch_qmds.R).
+This is the template used to generate a report for each entry (cruise or event)
+in data/keys_checkpoints_flat.csv (see ../generate_batch_qmds.R). Entries are
+keyed on cruise_id; report_label supplies the display title and falls back to the
+cruise_id when blank.
 -->
 
 ```{r setup}
@@ -53,7 +55,7 @@ regions_label <- paste(report$info$regions, collapse = ", ")
 target_time_label <- format_ndbc_time(report$salinity$target_time)
 ```
 
-Cruise **`r params$cruise_id`** surveyed **`r nrow(report$info$stations)`** checkpoint stations in the **`r regions_label`** during **`r window_label`**. The interpolated fields below approximate conditions on **`r target_time_label`** — the midpoint of the cruise's model window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the cruise's model window shaded.
+**`r report$info$label`** covers **`r nrow(report$info$stations)`** checkpoint stations in the **`r regions_label`** during **`r window_label`**. The interpolated fields below approximate conditions on **`r target_time_label`** — the midpoint of the window — from the NDBC buoy network. Time series show the full record at the NDBC buoy nearest each checkpoint station, with the window shaded.
 
 ## Checkpoint stations & nearest buoys
 

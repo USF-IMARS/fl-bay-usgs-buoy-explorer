@@ -58,7 +58,7 @@ plot_cruise_station_map <- function(matched_stations) {
     dplyr::distinct(nearest_station_id, nearest_station, nearest_latitude, nearest_longitude)
 
   map <- leaflet::leaflet(matched_stations) |>
-    leaflet::addProviderTiles("CartoDB.Positron") |>
+    leaflet::addProviderTiles("Esri.WorldGrayCanvas") |>
     leaflet::addScaleBar(position = "bottomleft")
 
   for (i in seq_len(nrow(matched_stations))) {

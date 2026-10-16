@@ -4,7 +4,7 @@
 
 BATCH_NAME <- "historical_highlights"
 TEMPLATE_REPLACEMENTS_KEY <- c(
-  "cruise_id", "window_start", "window_end", "regions", "n_stations"
+  "cruise_id", "label", "window_start", "window_end", "regions", "n_stations"
 )
 
 REPORT_TEMPLATE <- here::here(glue::glue("{BATCH_NAME}/template.qmd"))
@@ -62,6 +62,7 @@ current_files <- vapply(cruise_ids, function(cruise_id_value) {
   info <- cruise_summary(cruise_id_value, checkpoints)
   create_report(list(
     cruise_id = info$cruise_id,
+    label = info$label,
     window_start = format(info$window_start, "%Y-%m-%d"),
     window_end = format(info$window_end, "%Y-%m-%d"),
     regions = paste(info$regions, collapse = ", "),

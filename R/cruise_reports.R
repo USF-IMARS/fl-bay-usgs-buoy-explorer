@@ -26,8 +26,14 @@ cruise_summary <- function(cruise_id_value, checkpoints = read_cruise_checkpoint
   if (nrow(rows) == 0) {
     stop("No checkpoints found for cruise_id: ", cruise_id_value)
   }
+  # report_label is optional; fall back to the id so cruise entries are unchanged
+  label <- if (!is.null(rows$report_label)) rows$report_label[1] else NA_character_
+  if (is.na(label) || !nzchar(label)) {
+    label <- cruise_id_value
+  }
   list(
     cruise_id = cruise_id_value,
+    label = label,
     window_start = rows$model_window_start[1],
     window_end = rows$model_window_end[1],
     regions = sort(unique(rows$region)),

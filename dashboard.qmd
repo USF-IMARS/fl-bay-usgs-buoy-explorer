@@ -110,7 +110,7 @@ pal <- colorNumeric(
 )
 
 leaflet(salinity_data) |>
-  addProviderTiles("CartoDB.Positron") |>
+  addProviderTiles("Esri.WorldGrayCanvas") |>
   setView(
     lng = mean(salinity_data$longitude),
     lat = mean(salinity_data$latitude),

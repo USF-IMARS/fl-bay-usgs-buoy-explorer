@@ -36,7 +36,6 @@ plot_ndbc_field <- function(
     value_range = NULL,
     show_legend = TRUE,
     show_scale_bar = TRUE,
-    show_layers_control = TRUE,
     prefer_canvas = TRUE,
     show_marker_labels = TRUE,
     interactive_grid = TRUE,
@@ -95,31 +94,12 @@ plot_ndbc_field <- function(
     options = map_options
   )
 
-  if (show_layers_control) {
-    map <- map |>
-      leaflet::addMapPane("fieldValues", zIndex = 620) |>
-      leaflet::addProviderTiles(
-        leaflet::providers$Esri.OceanBasemap,
-        group = "Ocean",
-        options = tile_options
-      ) |>
-      leaflet::addProviderTiles(
-        leaflet::providers$CartoDB.Positron,
-        group = "Light",
-        options = tile_options
-      ) |>
-      leaflet::addProviderTiles(
-        leaflet::providers$OpenStreetMap,
-        group = "OpenStreetMap",
-        options = tile_options
-      )
-  } else {
-    map <- map |>
-      leaflet::addProviderTiles(
-        leaflet::providers$CartoDB.Positron,
-        options = tile_options
-      )
-  }
+  map <- map |>
+    leaflet::addMapPane("fieldValues", zIndex = 620) |>
+    leaflet::addProviderTiles(
+      leaflet::providers$Esri.WorldGrayCanvas,
+      options = tile_options
+    )
 
   map <- map |>
     leaflet::addRasterImage(
@@ -199,15 +179,6 @@ plot_ndbc_field <- function(
       }
     )
 
-  if (show_layers_control) {
-    map <- map |>
-      leaflet::addLayersControl(
-        baseGroups = c("Ocean", "Light", "OpenStreetMap"),
-        overlayGroups = c("Interpolated field", "Observations"),
-        options = leaflet::layersControlOptions(collapsed = TRUE)
-      )
-  }
-
   if (show_legend) {
     map <- map |>
       leaflet::addLegend(
@@ -284,8 +255,7 @@ plot_ndbc_field_panels <- function(
             height = panel_height,
             value_range = value_range,
             show_legend = i == last_valid_idx,
-            show_scale_bar = FALSE,
-            show_layers_control = FALSE
+            show_scale_bar = FALSE
           )
         }
       )
@@ -426,7 +396,6 @@ plot_ndbc_hour_field <- function(
     value_range = value_range,
     show_legend = TRUE,
     show_scale_bar = FALSE,
-    show_layers_control = FALSE,
     prefer_canvas = TRUE,
     show_marker_labels = FALSE,
     interactive_grid = FALSE,
@@ -467,7 +436,6 @@ plot_ndbc_hour_pair <- function(
       value_range = sal_value_range,
       show_legend = show_sal_legend,
       show_scale_bar = FALSE,
-      show_layers_control = FALSE,
       prefer_canvas = TRUE,
       show_marker_labels = FALSE,
       interactive_grid = FALSE,
@@ -489,7 +457,6 @@ plot_ndbc_hour_pair <- function(
       value_range = temp_value_range,
       show_legend = show_temp_legend,
       show_scale_bar = FALSE,
-      show_layers_control = FALSE,
       prefer_canvas = TRUE,
       show_marker_labels = FALSE,
       interactive_grid = FALSE,
